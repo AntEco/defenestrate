@@ -1,0 +1,186 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>Phaser - Making your first game, part 2</title>
+    <script type="text/javascript" src="assets/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var game = new Phaser.Game(1200, 800, Phaser.CANVAS, '', { preload: preload, create: create, update: update});
+
+var player;
+var cursors;
+
+var map;
+var walls;
+// var floor;
+// var windows;
+// var nothing;
+
+var bullets;
+var fireRate = 200
+var nextFire = 1
+
+
+function preload () {
+    game.load.tilemap('map', 'assets/map3.json', null, Phaser.Tilemap.TILED_JSON);
+    game.load.spritesheet('mainchar', 'assets/mainChar.png', 60, 44);
+    game.load.image('bullet', 'assets/bulletred.png');
+    game.load.image('tile1', 'assets/tile_42.png');
+    // game.load.image('tile2', 'assets/tile_43.png');
+    // game.load.image('tile3', 'assets/tile_40.png');
+    // game.load.image('tile4', 'assets/tile_433.png');
+    // game.load.image('tile5', 'assets/tile_436.png');
+    // game.load.image('tile6', 'assets/tile_514.png');
+    // game.load.image('tile7', 'assets/tile_515.png');
+    // game.load.image('tile8', 'assets/tile_516.png');
+    // game.load.image('tile9', 'assets/tile_517.png');
+    // game.load.image('tile10', 'assets/tile_518.png');
+
+}
+
+function create() {
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+
+    game.stage.backgroundColor = '#FFF';
+    
+    cursors = game.input.keyboard.createCursorKeys();
+    
+    player = game.add.sprite(350, 250, 'mainchar');
+    player.anchor.setTo(0.5, .5)
+    game.physics.arcade.enable(player);
+
+    player.body.collideWorldBounds = true;
+    player.animations.add('run', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], 22, true);
+
+    bullets = game.add.group();
+    bullets.enableBody = true;
+    bullets.physicsBodyType = Phaser.Physics.ARCADE;
+
+    bullets.createMultiple(50, 'bullet');
+    bullets.setAll('checkWorldBounds', true);
+    bullets.setAll('outOfBoundsKill', true);
+
+    map = game.add.tilemap('map')
+    map.addTilesetImage('tile_42', 'tile1');
+    map.setCollisionBetween(1, 10000, true, walls);
+    // map.setCollisionBetween(20, 25);
+    // map.setCollisionBetween(27, 29);
+    // map.setCollision(40);
+    // map.addTilesetImage('tile_43', 'tile2');
+    // map.addTilesetImage('tile_40', 'tile3');
+    // map.addTilesetImage('tile_433', 'tile4');
+    // map.addTilesetImage('tile_436', 'tile5');
+    // map.addTilesetImage('tile_514', 'tile6');
+    // map.addTilesetImage('tile_515', 'tile7');
+    // map.addTilesetImage('tile_516', 'tile8');
+    // map.addTilesetImage('tile_517', 'tile9');
+    // map.addTilesetImage('tile_518', 'tile10');
+
+    walls = map.createLayer('Walls');
+    // windows = map.createLayer('Windows');
+    // floor = map.createLayer('Floor')
+    // nothing = map.createLayer('Nothing')
+}
+
+function update() {
+    player.body.velocity.x = 0;
+    player.body.velocity.y = 0;
+    game.physics.arcade.collide(player, walls);
+    game.physics.arcade.overlap(bullet, walls, collisionHandler, null, this);
+    if (cursors.up.isDown){
+        player.body.velocity.y = -150;
+
+        player.animations.play('run');
+
+        if (cursors.up.isDown && cursors.right.isDown)
+        {
+            player.body.velocity.x = 150;
+            player.body.velocity.y = -150;
+            player.animations.play('run');
+        }
+        else if (cursors.up.isDown && cursors.left.isDown)
+        {
+            player.body.velocity.x = -150;
+            player.body.velocity.y = -150;
+            player.animations.play('run');
+        }
+    }
+    else if (cursors.down.isDown)
+    {
+        //  Move to the right
+        player.body.velocity.y = 150;
+
+        player.animations.play('run');
+
+        if (cursors.down.isDown && cursors.right.isDown)
+        {
+            player.body.velocity.x = 150;
+            player.body.velocity.y = 150;
+            player.animations.play('run');
+        }
+        else if (cursors.down.isDown && cursors.left.isDown)
+        {
+            player.body.velocity.x = -150;
+            player.body.velocity.y = 150;
+            player.animations.play('run');
+        }
+    }
+    else if (cursors.left.isDown)
+    {
+        player.body.velocity.x = -150;
+        player.animations.play('run');
+
+    }
+    else if (cursors.right.isDown)
+    {
+        player.body.velocity.x = 150;
+        player.animations.play('run');
+    }
+    
+    else
+    {
+        //  Stand still
+        player.animations.stop();
+
+        player.frame = 0;
+    }
+    player.rotation = game.physics.arcade.angleToPointer(player)
+
+    if (game.input.activePointer.isDown)
+    {
+        fire();
+    }
+}
+
+function fire() {
+    if (game.time.now > nextFire && bullets.countDead() > 0)
+    {
+        nextFire = game.time.now + fireRate;
+
+        var bullet = bullets.getFirstDead();
+
+        bullet.reset(player.x, player.y);
+
+        game.physics.arcade.moveToPointer(bullet, 300);
+    }
+}
+
+function collisionHandler (bullet, walls) {
+
+    //  When a bullet hits an alien we kill them both
+    bullet.kill();    
+}
+
+</script>
+
+    </body>
+</html>
