@@ -17,7 +17,10 @@
 var game = new Phaser.Game(1200, 800, Phaser.CANVAS, '', { preload: preload, create: create, update: update});
 
 var player;
+var bulletPoint;
+
 var cursors;
+var meleeKey;
 
 var map;
 var walls;
@@ -30,15 +33,15 @@ var nextFire = 1;
 var bullet;
 
 function preload () {
-    game.load.tilemap('map', 'assets/map3.json', null, Phaser.Tilemap.TILED_JSON);
+    game.load.tilemap('map', 'assets/map4.json', null, Phaser.Tilemap.TILED_JSON);
     game.load.image('tile1', 'assets/tile_42.png');
     game.load.image('tile2', 'assets/tile_43.png');
     game.load.image('tile3', 'assets/tile_12.png');
     game.load.image('tile4', 'assets/tile_435.png');
     game.load.image('tile5', 'assets/tile_20.png');
     game.load.image('tile6', 'assets/tile_436.png');
-
-    game.load.spritesheet('mainchar', 'assets/mainChar.png', 60, 44);
+    game.load.atlas('johnwick', 'assets/jsonsprites.png', 'assets/jsonsprites.json')
+    game.load.atlas('enemy_sprite', 'assets/enemy_sprites.png', 'assets/enemy_sprites.json')
     game.load.image('bullet', 'assets/bulletred.png');
 
 }
@@ -49,6 +52,7 @@ function create() {
     game.stage.backgroundColor = '#00000';
     
     cursors = game.input.keyboard.createCursorKeys();
+    meleeKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
     game.time.advancedTiming = true;
     game.time.desriredFps = 120;
@@ -67,13 +71,17 @@ function create() {
     floor = map.createLayer('Floor');
     windows = map.createLayer('Windows');
 
-    player = game.add.sprite(120, 680, 'mainchar');
+    player = game.add.sprite(340, 700, 'johnwick');
     game.physics.arcade.enable(player);
     player.anchor.setTo(0.5, .5)
-
     player.body.collideWorldBounds = true;
-    player.animations.add('run', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], 22, true);
-    player.bringToTop();
+    player.animations.add('run', Phaser.Animation.generateFrameNames ('run', 1, 19), 22, true);
+    player.animations.add('melee', Phaser.Animation.generateFrameNames('hit', 1, 15), 18, true);
+
+    enemies = game.add.group();
+    enemies.enableBody = true;
+    map.createFromObjects('Enemies', 6, 'enemy_sprite', 0, true, false, enemies);
+    enemies.physicsBodyType = Phaser.Physics.ARCADE;
 
     bullets = game.add.group();
     game.physics.arcade.enable(bullets);
@@ -99,7 +107,7 @@ function update() {
     player.body.velocity.y = 0;
 
     game.physics.arcade.collide(player, walls);
-    
+    game.physics.arcade.overlap(enemies, bullets, enemyKill, null, this)
     game.physics.arcade.collide(bullets, walls, collisionHandler, null, this);
 
 
@@ -156,7 +164,10 @@ function update() {
         player.body.velocity.x = 150;
         player.animations.play('run');
     }
-    
+    else if (meleeKey.isDown){
+        game.time.slowMotion = 1
+        player.animations.play('melee')
+    } 
     else
     {
         game.time.slowMotion = 10
@@ -172,15 +183,18 @@ function update() {
         fire();
     }
 
-    // if (cursors.isUp = true){
-    //     slowTime();
-    // }
+    if (meleeKey.isDown){
+        meleebitch();
+    }
+
+    bulletPoint = new Phaser.Point(player.x + 29, player.y + 8);
+    bulletPoint.rotate(player.x, player.y, player.rotation)
     
 }
 
-// function slowTime() {
-//     game.time.slowMotion = 1
-// }
+function meleebitch() {
+        player.animations.play('melee');
+    }
 
 function fire() {
     if (game.time.now > nextFire && bullets.countDead() > 0)
@@ -189,7 +203,7 @@ function fire() {
 
         bullet = bullets.getFirstDead();
 
-        bullet.reset(player.x, player.y);
+        bullet.reset(bulletPoint.x, bulletPoint.y);
 
         bullet.rotation = game.physics.arcade.moveToPointer(bullet, 1000, game.input.activePointer);
 
@@ -200,6 +214,12 @@ function collisionHandler (bullets, walls) {
 
     //  When a bullet hits an alien we kill them both
     bullets.kill();    
+}
+
+function enemyKill (enemies, bullets) {
+
+    bullets.kill()
+    enemies.kill()
 }
 
 </script>
