@@ -32,6 +32,14 @@ var fireRate = 200;
 var nextFire = 1;
 var bullet;
 
+var enemyBullet;
+var enemiesTotal = 0;
+var firingTimer = 0;
+var enemyFireRate = 200;
+var enemyNextFire = 1;
+var livingEnemies = [];
+var bitmap;
+
 function preload () {
     game.load.tilemap('map', 'assets/map4.json', null, Phaser.Tilemap.TILED_JSON);
     game.load.image('tile1', 'assets/tile_42.png');
@@ -50,6 +58,11 @@ function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
     game.stage.backgroundColor = '#00000';
+
+    bitmap = game.add.bitmapData(game.width, game.height);
+    bitmap.context.fillStyle = 'rgb(255, 255, 255)';
+    bitmap.context.strokeStyle = 'rgb(255, 255, 255)';
+    game.add.image(0, 0, bitmap);
     
     cursors = game.input.keyboard.createCursorKeys();
     meleeKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -65,7 +78,7 @@ function create() {
     map.addTilesetImage('tile_20', 'tile5');
     map.addTilesetImage('tile_436', 'tile6');
 
-    map.setCollisionBetween(1, 10000, true, walls);
+    map.setCollisionBetween(1, 2400, true, walls);
 
     walls = map.createLayer('Walls');
     floor = map.createLayer('Floor');
@@ -77,26 +90,44 @@ function create() {
     player.body.collideWorldBounds = true;
     player.animations.add('run', Phaser.Animation.generateFrameNames ('run', 1, 19), 22, true);
     player.animations.add('melee', Phaser.Animation.generateFrameNames('hit', 1, 15), 18, true);
+    player.bringToTop();
+
 
     enemies = game.add.group();
     enemies.enableBody = true;
     map.createFromObjects('Enemies', 6, 'enemy_sprite', 0, true, false, enemies);
     enemies.physicsBodyType = Phaser.Physics.ARCADE;
 
+    enemyBullets = game.add.group();
+    enemyBullets.enableBody = true;
+    enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
+    enemyBullets.createMultiple(30, 'bullet');
+    enemyBullets.setAll('anchor.x', 0.5);
+    enemyBullets.setAll('anchor.y', 1);
+    enemyBullets.setAll('outOfBoundsKill', true);
+    enemyBullets.setAll('checkWorldBounds', true);
+
     bullets = game.add.group();
     game.physics.arcade.enable(bullets);
     bullets.enableBody = true;
-    
-
     bullets.createMultiple(10, 'bullet');
     bullets.setAll('checkWorldBounds', true);
     bullets.setAll('outOfBoundsKill', true);
 
 
 
-    // game.camera.follow(player)
+    game.camera.follow(player)
     // game.camera.deadzone = new Phaser.Rectangle(150, 150, 500, 300);
     // game.camera.focusOnXY(0, 0);
+
+    var NUMBER_OF_WALLS = 4;
+    walls = game.add.group();
+    var i, x, y;
+    for(i = 0; i < NUMBER_OF_WALLS; i++) {
+        x = i * game.width/NUMBER_OF_WALLS + 50;
+        y = game.rnd.integerInRange(50, game.height - 200);
+        game.add.image(x, y, 'block', 0, walls).scale.setTo(3, 3);
+    }
 
 
 }
@@ -106,7 +137,8 @@ function update() {
     player.body.velocity.x = 0;
     player.body.velocity.y = 0;
 
-    game.physics.arcade.collide(player, walls);
+    
+    game.physics.arcade.collide(enemies, walls);
     game.physics.arcade.overlap(enemies, bullets, enemyKill, null, this)
     game.physics.arcade.collide(bullets, walls, collisionHandler, null, this);
 
@@ -178,10 +210,15 @@ function update() {
 
     player.rotation = game.physics.arcade.angleToPointer(player)
 
-    if (game.input.activePointer.isDown)
-    {
+    // each.enemies.rotation = game.physics.arcade.angleBetween(enemies, player)
+
+    if (game.input.activePointer.isDown){
         fire();
     }
+    // if (game.time.now > firingTimer)
+    //     {
+    //         enemyFires();
+    //     }
 
     if (meleeKey.isDown){
         meleebitch();
@@ -189,7 +226,70 @@ function update() {
 
     bulletPoint = new Phaser.Point(player.x + 29, player.y + 8);
     bulletPoint.rotate(player.x, player.y, player.rotation)
-    
+
+    bitmap.context.clearRect(0, 0, this.game.width, this.game.height);
+
+    enemies.forEach(function(enemy){
+        var ray = new Phaser.Line(enemy.x, enemy.y, player.x, player.y);
+        var intersect = getWallIntersection(ray);
+
+        if (intersect) {
+
+        }
+        else{
+            bitmap.context.beginPath();
+            bitmap.context.moveTo(enemy.x, enemy.y);
+            bitmap.context.lineTo(player.x, player.y);
+            bitmap.context.stroke();
+            // enemyNextFire = game.time.now + enemyFireRate;
+
+            //     enemyBullet = enemyBullets.getFirstDead();
+
+            //     enemyBullet.reset(enemy.x, enemy.y);
+
+            //     enemyBullet.rotation = game.physics.arcade.moveToObject(enemyBullet, 500, player)
+            //     game.physics.arcade.moveToObject(enemyBullet, player, 500);
+        }
+
+    });
+
+    bitmap.dirty = true;
+
+
+}
+
+function getWallIntersection(ray){
+    var distanceToWall = Number.POSITIVE_INFINITY;
+    var closestIntersection = null;
+
+    walls.forEach(function(wall){
+        var lines = [
+            new Phaser.Line(wall.x, wall.y, wall.x + wall.width, wall.y),
+            new Phaser.Line(wall.x, wall.y, wall.x, wall.y + wall.height),
+            new Phaser.Line(wall.x + wall.width, wall.y,
+                wall.x + wall.width, wall.y + wall.height),
+            new Phaser.Line(wall.x, wall.y + wall.height,
+                wall.x + wall.width, wall.y + wall.height)
+        ];
+
+        for(var i = 0; i < lines.length; i++) {
+            var intersect = Phaser.Line.intersects(ray, lines[i]);
+            if (intersect) {
+                // Find the closest intersection
+                distance =
+                    game.math.distance(ray.start.x, ray.start.y, intersect.x, intersect.y);
+                if (distance < distanceToWall) {
+                    distanceToWall = distance;
+                    closestIntersection = intersect;
+                }
+            }
+        }
+
+    })
+    return closestIntersection
+
+        game.physics.arcade.collide(player, walls);
+
 }
 
 function meleebitch() {
@@ -221,6 +321,24 @@ function enemyKill (enemies, bullets) {
     bullets.kill()
     enemies.kill()
 }
+
+// function enemyFires () {
+
+//     enemies.forEach (function(enemy) {
+
+//                 enemyNextFire = game.time.now + enemyFireRate;
+
+//                 enemyBullet = enemyBullets.getFirstDead();
+
+//                 enemyBullet.reset(enemy.x, enemy.y);
+
+//                 enemyBullet.rotation = game.physics.arcade.moveToObject(enemyBullet, 500, player)
+//                 game.physics.arcade.moveToObject(enemyBullet, player, 500);
+
+        
+//     })
+
+// }
 
 </script>
 
