@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <title>Phaser - Making your first game, part 2</title>
     <script type="text/javascript" src="assets/phaser.min.js"></script>
+    <script type="text/javascript" src="assets/boot.js"></script>
+    <script type="text/javascript" src="assets/game.js"></script>
+    <script type="text/javascript" src="assets/load.js"></script>
+    <script type="text/javascript" src="assets/menu.js"></script>
+    <script type="text/javascript" src="assets/play.js"></script>
+
     <style type="text/css">
         body {
             margin: 0;
@@ -14,7 +20,35 @@
 
 <script type="text/javascript">
 
-var game = new Phaser.Game(1200, 800, Phaser.CANVAS, '', { preload: preload, create: create, update: update});
+TheEnemy = function(index, game, player, bullets){
+    var x = game.world.randomX;
+    var y = game.world.randomY;
+
+    this.game = game;
+    this.health = 1;
+    this.player = player;
+    this.bullets = bullets;
+    this.fireRate = 600;
+    this.nextFire = 1;
+    this.alive = true;
+
+    this.enemyGuy = game.add.sprite(x, y, 'enemy_sprite');
+
+    this.enemyGuy.anchor.setTo(0.5, 0.5)
+
+    this.enemyGuy.name = index.toString();
+    game.physics.enable(this.enemyGuy, Phaser.Physics.ARCADE);
+    this.enemyGuy.body.immovable = false;
+    this.enemyGuy.body.collideWorldBounds = true;
+
+
+};
+
+TheEnemy.prototype.update = function(){
+    this.enemyGuy.rotation = this.game.physics.arcade.angleBetween(this.enemyGuy, this.player);
+}
+
+var game = new Phaser.Game(1200, 700, Phaser.CANVAS, '', { preload: preload, create: create, update: update});
 
 var player;
 var bulletPoint;
@@ -32,25 +66,34 @@ var fireRate = 200;
 var nextFire = 1;
 var bullet;
 
-var enemyBullet;
+var badGuys;
+
+var enemies;
+var enemyGuy;
+
+var enemyBullets;
 var enemiesTotal = 0;
+var enemiesAlive = 0;
 var firingTimer = 0;
-var enemyFireRate = 200;
+var enemyFireRate = 600;
 var enemyNextFire = 1;
 var livingEnemies = [];
 var bitmap;
 
 function preload () {
-    game.load.tilemap('map', 'assets/map4.json', null, Phaser.Tilemap.TILED_JSON);
+    game.load.tilemap('map', 'assets/finalmap.json', null, Phaser.Tilemap.TILED_JSON);
     game.load.image('tile1', 'assets/tile_42.png');
     game.load.image('tile2', 'assets/tile_43.png');
     game.load.image('tile3', 'assets/tile_12.png');
     game.load.image('tile4', 'assets/tile_435.png');
     game.load.image('tile5', 'assets/tile_20.png');
     game.load.image('tile6', 'assets/tile_436.png');
+    game.load.image('block', 'assets/raycastblock.png')
     game.load.atlas('johnwick', 'assets/jsonsprites.png', 'assets/jsonsprites.json')
     game.load.atlas('enemy_sprite', 'assets/enemy_sprites.png', 'assets/enemy_sprites.json')
+    game.load.spritesheet('lookupbadguy', 'assets/badguysprite.png', 35, 75, 20)
     game.load.image('bullet', 'assets/bulletred.png');
+    game.load.image('blackbullet', 'assets/blackbullet.png')
 
 }
 
@@ -60,7 +103,7 @@ function create() {
     game.stage.backgroundColor = '#00000';
 
     bitmap = game.add.bitmapData(game.width, game.height);
-    bitmap.context.fillStyle = 'rgb(255, 255, 255)';
+    bitmap.context.fillStyle = '';
     bitmap.context.strokeStyle = 'rgb(255, 255, 255)';
     game.add.image(0, 0, bitmap);
     
@@ -68,42 +111,58 @@ function create() {
     meleeKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
     game.time.advancedTiming = true;
-    game.time.desriredFps = 120;
+    game.time.desiredFps = 120;
     
     map = game.add.tilemap('map')
     map.addTilesetImage('tile_42', 'tile1');
     map.addTilesetImage('tile_43', 'tile2');
     map.addTilesetImage('tile_12', 'tile3');
     map.addTilesetImage('tile_435', 'tile4');
-    map.addTilesetImage('tile_20', 'tile5');
     map.addTilesetImage('tile_436', 'tile6');
 
     map.setCollisionBetween(1, 2400, true, walls);
 
-    walls = map.createLayer('Walls');
-    floor = map.createLayer('Floor');
-    windows = map.createLayer('Windows');
+    outerwalls = map.createLayer('outer_walls');
+    floor = map.createLayer('floor');
+    windows = map.createLayer('windows');
 
-    player = game.add.sprite(340, 700, 'johnwick');
+    enemies = [];
+
+    enemiesTotal = 3;
+    enemiesAlive = 3;
+
+    for (var i = 0; i < enemiesTotal; i++)
+    {
+        enemies.push(new TheEnemy(i, game, enemyGuy, enemyBullets));
+    }
+
+    // enemies = game.add.group();
+    // enemies.enableBody = true;
+    // map.createFromObjects('Enemies', 6, 'enemy_sprite', 0, true, false, enemies);
+    // enemies.physicsBodyType = Phaser.Physics.ARCADE;
+
+    badGuys = game.add.group();
+    badGuys.enableBody = true;
+    badGuys.setAll('anchor.x', 0.5);
+    badGuys.setAll('anchor.y', 0.5);
+    badGuys.physicsBodyType = Phaser.Physics.ARCADE;
+
+    createBadGuys();
+
+    player = game.add.sprite(440, 300, 'johnwick');
     game.physics.arcade.enable(player);
-    player.anchor.setTo(0.5, .5)
+    player.anchor.setTo(0.5, 0.5)
     player.body.collideWorldBounds = true;
     player.animations.add('run', Phaser.Animation.generateFrameNames ('run', 1, 19), 22, true);
     player.animations.add('melee', Phaser.Animation.generateFrameNames('hit', 1, 15), 18, true);
     player.bringToTop();
 
-
-    enemies = game.add.group();
-    enemies.enableBody = true;
-    map.createFromObjects('Enemies', 6, 'enemy_sprite', 0, true, false, enemies);
-    enemies.physicsBodyType = Phaser.Physics.ARCADE;
-
     enemyBullets = game.add.group();
     enemyBullets.enableBody = true;
     enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
-    enemyBullets.createMultiple(30, 'bullet');
+    enemyBullets.createMultiple(30, 'blackbullet');
     enemyBullets.setAll('anchor.x', 0.5);
-    enemyBullets.setAll('anchor.y', 1);
+    enemyBullets.setAll('anchor.y', 0.5);
     enemyBullets.setAll('outOfBoundsKill', true);
     enemyBullets.setAll('checkWorldBounds', true);
 
@@ -120,16 +179,31 @@ function create() {
     // game.camera.deadzone = new Phaser.Rectangle(150, 150, 500, 300);
     // game.camera.focusOnXY(0, 0);
 
-    var NUMBER_OF_WALLS = 4;
+    var NUMBER_OF_WALLS = 3;
     walls = game.add.group();
     var i, x, y;
     for(i = 0; i < NUMBER_OF_WALLS; i++) {
-        x = i * game.width/NUMBER_OF_WALLS + 50;
-        y = game.rnd.integerInRange(50, game.height - 200);
-        game.add.image(x, y, 'block', 0, walls).scale.setTo(3, 3);
+        x = 802;
+        y = i * 200 + 150 ;
+        game.add.image(x, y, 'block', 0, walls).scale.setTo(.5, 8);
     }
 
 
+}
+
+function createBadGuys(){
+
+    for (var y = 0; y < 2; y++)
+    {
+        for (var x = 0; x < 1; x++){
+            var badGuy = badGuys.create(x, y * 250, 'lookupbadguy');
+            badGuy.animations.add('badGuyRun', Phaser.Animation.generateFrameNames ('badguy', 1, 19), 22, true);
+            badGuy.anchor.setTo(0.5, .5)
+
+        }
+    }
+    badGuys.x = 920
+    badGuys.y = 280
 }
 
 function update() {
@@ -137,12 +211,25 @@ function update() {
     player.body.velocity.x = 0;
     player.body.velocity.y = 0;
 
-    
-    game.physics.arcade.collide(enemies, walls);
-    game.physics.arcade.overlap(enemies, bullets, enemyKill, null, this)
-    game.physics.arcade.collide(bullets, walls, collisionHandler, null, this);
+    enemies.rotation = game.physics.arcade.angleBetween(enemies, player);
 
+    game.physics.arcade.collide(player, outerwalls);
+    game.physics.arcade.collide(bullets, outerwalls, collisionHandler, null, this);
+    game.physics.arcade.collide(badGuys, walls);
+    game.physics.arcade.collide(enemyBullets, outerwalls, bulletGoAway, null, this);
+    game.physics.arcade.overlap(badGuys, bullets, enemyKill, null, this)
 
+    enemiesAlive = 0;
+
+    for (var i = 0; i < enemies.length; i++)
+    {
+        if (enemies[i].alive)
+        {
+            enemiesAlive++;
+            game.physics.arcade.collide(enemies, bullets, enemyKill2, null, this);
+
+        }
+    }
     if (cursors.up.isDown){
         game.time.slowMotion = 1
         player.body.velocity.y = -150;
@@ -210,18 +297,12 @@ function update() {
 
     player.rotation = game.physics.arcade.angleToPointer(player)
 
-    // each.enemies.rotation = game.physics.arcade.angleBetween(enemies, player)
-
     if (game.input.activePointer.isDown){
         fire();
     }
-    // if (game.time.now > firingTimer)
-    //     {
-    //         enemyFires();
-    //     }
 
     if (meleeKey.isDown){
-        meleebitch();
+        defenestrate();
     }
 
     bulletPoint = new Phaser.Point(player.x + 29, player.y + 8);
@@ -229,33 +310,24 @@ function update() {
 
     bitmap.context.clearRect(0, 0, this.game.width, this.game.height);
 
-    enemies.forEach(function(enemy){
-        var ray = new Phaser.Line(enemy.x, enemy.y, player.x, player.y);
+    badGuys.forEach(function(findMe){
+        var ray = new Phaser.Line(findMe.x + 235, findMe.y + 67.5, player.x, player.y);
         var intersect = getWallIntersection(ray);
+        findMe.anchor.setTo(.5, .5)
 
         if (intersect) {
 
         }
         else{
             bitmap.context.beginPath();
-            bitmap.context.moveTo(enemy.x, enemy.y);
+            bitmap.context.moveTo(findMe.x + 935, findMe.y + 67.5);
             bitmap.context.lineTo(player.x, player.y);
-            bitmap.context.stroke();
-            // enemyNextFire = game.time.now + enemyFireRate;
-
-            //     enemyBullet = enemyBullets.getFirstDead();
-
-            //     enemyBullet.reset(enemy.x, enemy.y);
-
-            //     enemyBullet.rotation = game.physics.arcade.moveToObject(enemyBullet, 500, player)
-            //     game.physics.arcade.moveToObject(enemyBullet, player, 500);
+            // bitmap.context.stroke();
         }
 
     });
 
     bitmap.dirty = true;
-
-
 }
 
 function getWallIntersection(ray){
@@ -281,18 +353,16 @@ function getWallIntersection(ray){
                 if (distance < distanceToWall) {
                     distanceToWall = distance;
                     closestIntersection = intersect;
+                    enemyFires();
                 }
             }
         }
 
     })
-    return closestIntersection
-
-        game.physics.arcade.collide(player, walls);
 
 }
 
-function meleebitch() {
+function defenestrate() {
         player.animations.play('melee');
     }
 
@@ -311,34 +381,54 @@ function fire() {
 }
 
 function collisionHandler (bullets, walls) {
-
-    //  When a bullet hits an alien we kill them both
     bullets.kill();    
 }
 
-function enemyKill (enemies, bullets) {
+function bulletGoAway (enemyBullets, outerwalls){
+    enemyBullets.kill()
+}
 
+function enemyKill (badGuys, bullets) {
+    bullets.kill()
+    badGuys.kill()
+}
+
+function enemyKill2 (enemies, bullets) {
     bullets.kill()
     enemies.kill()
 }
 
-// function enemyFires () {
+function enemyFires () {
 
-//     enemies.forEach (function(enemy) {
+    //  Grab the first bullet we can from the pool
+    enemyBullet = enemyBullets.getFirstExists(false);
 
-//                 enemyNextFire = game.time.now + enemyFireRate;
+    livingEnemies.length=0;
 
-//                 enemyBullet = enemyBullets.getFirstDead();
+    badGuys.forEachAlive(function(badGuy){
 
-//                 enemyBullet.reset(enemy.x, enemy.y);
+        // put every living enemy in an array
+        livingEnemies.push(badGuy);
+    });
 
-//                 enemyBullet.rotation = game.physics.arcade.moveToObject(enemyBullet, 500, player)
-//                 game.physics.arcade.moveToObject(enemyBullet, player, 500);
+if (game.time.now > enemyNextFire && enemyBullets.countDead() && livingEnemies.length > 0)
+    
+    {
 
+        enemyNextFire = game.time.now + enemyFireRate;
         
-//     })
+        var random=game.rnd.integerInRange(0,livingEnemies.length-1);
 
-// }
+        // randomly select one of them
+        var shooter=livingEnemies[random];
+        // And fire the bullet from this enemy
+        enemyBullet.reset(shooter.body.x, shooter.body.y);
+
+        game.physics.arcade.moveToObject(enemyBullet, player, 500);
+        firingTimer = game.time.now + 200;
+    }
+
+}
 
 </script>
 
