@@ -2,14 +2,8 @@
 <html lang="en"> 
 <head> 
     <meta charset="UTF-8" />
-    <title>Phaser - Making your first game, part 2</title>
+    <title>Defenestrate</title>
     <script type="text/javascript" src="assets/phaser.min.js"></script>
-    <script type="text/javascript" src="assets/boot.js"></script>
-    <script type="text/javascript" src="assets/game.js"></script>
-    <script type="text/javascript" src="assets/load.js"></script>
-    <script type="text/javascript" src="assets/menu.js"></script>
-    <script type="text/javascript" src="assets/play.js"></script>
-
     <style type="text/css">
         body {
             margin: 0;
@@ -20,38 +14,25 @@
 
 <script type="text/javascript">
 
-TheEnemy = function(index, game, player, bullets){
-    var x = game.world.randomX;
-    var y = game.world.randomY;
-
-    this.game = game;
-    this.health = 1;
-    this.player = player;
-    this.bullets = bullets;
-    this.fireRate = 600;
-    this.nextFire = 1;
-    this.alive = true;
-
-    this.enemyGuy = game.add.sprite(x, y, 'enemy_sprite');
-
-    this.enemyGuy.anchor.setTo(0.5, 0.5)
-
-    this.enemyGuy.name = index.toString();
-    game.physics.enable(this.enemyGuy, Phaser.Physics.ARCADE);
-    this.enemyGuy.body.immovable = false;
-    this.enemyGuy.body.collideWorldBounds = true;
-
-
-};
-
-TheEnemy.prototype.update = function(){
-    this.enemyGuy.rotation = this.game.physics.arcade.angleBetween(this.enemyGuy, this.player);
-}
-
 var game = new Phaser.Game(1200, 700, Phaser.CANVAS, '', { preload: preload, create: create, update: update});
+
+// WebFontConfig = {
+
+//     //  'active' means all requested fonts have finished loading
+//     //  We set a 1 second delay before calling 'createText'.
+//     //  For some reason if we don't the browser cannot render the text the first time it's created.
+//     active: function() { game.time.events.add(Phaser.Timer.SECOND, createText, this); },
+
+//     //  The Google Fonts we want to load (specify as many as you like in the array)
+//     google: {
+//       families: ['Press Start 2P']
+//     }
+
+// };
 
 var player;
 var bulletPoint;
+var testBulletPoint;
 
 var cursors;
 var meleeKey;
@@ -68,19 +49,41 @@ var bullet;
 
 var badGuys;
 
-var enemies;
-var enemyGuy;
-
 var enemyBullets;
-var enemiesTotal = 0;
-var enemiesAlive = 0;
+var enemyBullets2;
+var enemyBullets3;
+var enemyBullets4;
+var enemyBullets5;
+var enemyBullets6;
+
 var firingTimer = 0;
-var enemyFireRate = 600;
-var enemyNextFire = 1;
+var enemyFireRate = 3000;
+var enemyNextFire = 100;
+var enemyNextFire2 = 100;
+var enemyNextFire3 = 100;
+var enemyNextFire4 = 100;
+var enemyNextFire5 = 100;
+var enemyNextFire6 = 100;
+
 var livingEnemies = [];
 var bitmap;
 
+var enemy1;
+var enemy2;
+var enemy3;
+var enemy4;
+var enemy5;
+var enemy6;
+
+var menuSong;
+var sloMoEffect;
+var fastMoEffect;
+var pauseButton;
+var text = null;
+
+
 function preload () {
+    // game.load.script('webfont', '//fonts.googleapis.com/css?family=Press+Start+2P');
     game.load.tilemap('map', 'assets/finalmap.json', null, Phaser.Tilemap.TILED_JSON);
     game.load.image('tile1', 'assets/tile_42.png');
     game.load.image('tile2', 'assets/tile_43.png');
@@ -88,12 +91,17 @@ function preload () {
     game.load.image('tile4', 'assets/tile_435.png');
     game.load.image('tile5', 'assets/tile_20.png');
     game.load.image('tile6', 'assets/tile_436.png');
-    game.load.image('block', 'assets/raycastblock.png')
-    game.load.atlas('johnwick', 'assets/jsonsprites.png', 'assets/jsonsprites.json')
-    game.load.atlas('enemy_sprite', 'assets/enemy_sprites.png', 'assets/enemy_sprites.json')
-    game.load.spritesheet('lookupbadguy', 'assets/badguysprite.png', 35, 75, 20)
+    game.load.image('block', 'assets/raycastblock.png');
+    game.load.atlas('johnwick', 'assets/jsonsprites.png', 'assets/jsonsprites.json');
+    game.load.atlas('enemy_sprite', 'assets/enemy_sprites.png', 'assets/enemy_sprites.json');
+    game.load.spritesheet('lookupbadguy', 'assets/badguysprite.png', 35, 75, 20);
     game.load.image('bullet', 'assets/bulletred.png');
-    game.load.image('blackbullet', 'assets/blackbullet.png')
+    game.load.image('blackbullet', 'assets/blackbullet.png');
+    game.load.image('blackbullet2', 'assets/blackbullet2.png');
+    game.load.audio('menuSong', 'assets/OddLook.mp3');
+    game.load.audio('slowMoEffect', 'assets/slowmo.mp3');
+    game.load.audio('fastMoEffect', 'assets/fastmo.mp3');
+    game.load.image('pause', 'assets/pause.png');
 
 }
 
@@ -106,7 +114,25 @@ function create() {
     bitmap.context.fillStyle = '';
     bitmap.context.strokeStyle = 'rgb(255, 255, 255)';
     game.add.image(0, 0, bitmap);
+
+    // menuSong = game.add.audio('menuSong');
+    // menuSong.loop = true;
+    // menuSong.play()
+
+    slowMoEffect = game.add.audio('slowMoEffect');
     
+    // pauseButton = game.add.sprite(1120, 20, 'pause');
+    // pauseButton.inputEnabled = true;
+    // pauseButton.events.onInputUp.add(function () {
+    //     game.paused = true;
+    // });
+    // pauseButton.events.onInputDown.add(function () {
+    //     if (game.paused = true){
+    //         game.paused = false;
+    //     }
+    // });
+
+
     cursors = game.input.keyboard.createCursorKeys();
     meleeKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
@@ -126,21 +152,6 @@ function create() {
     floor = map.createLayer('floor');
     windows = map.createLayer('windows');
 
-    enemies = [];
-
-    enemiesTotal = 3;
-    enemiesAlive = 3;
-
-    for (var i = 0; i < enemiesTotal; i++)
-    {
-        enemies.push(new TheEnemy(i, game, enemyGuy, enemyBullets));
-    }
-
-    // enemies = game.add.group();
-    // enemies.enableBody = true;
-    // map.createFromObjects('Enemies', 6, 'enemy_sprite', 0, true, false, enemies);
-    // enemies.physicsBodyType = Phaser.Physics.ARCADE;
-
     badGuys = game.add.group();
     badGuys.enableBody = true;
     badGuys.setAll('anchor.x', 0.5);
@@ -149,13 +160,49 @@ function create() {
 
     createBadGuys();
 
-    player = game.add.sprite(440, 300, 'johnwick');
+    player = game.add.sprite(440, 570, 'johnwick');
     game.physics.arcade.enable(player);
     player.anchor.setTo(0.5, 0.5)
     player.body.collideWorldBounds = true;
     player.animations.add('run', Phaser.Animation.generateFrameNames ('run', 1, 19), 22, true);
     player.animations.add('melee', Phaser.Animation.generateFrameNames('hit', 1, 15), 18, true);
     player.bringToTop();
+
+    enemy1 = game.add.sprite(150, 150, 'enemy_sprite');
+    game.physics.arcade.enable(enemy1);
+    enemy1.anchor.setTo(0.5, 0.5)
+    enemy1.body.collideWorldBounds = true;
+    enemy1.alive = true;
+
+    enemy2 = game.add.sprite(150, 300, 'enemy_sprite');
+    game.physics.arcade.enable(enemy2);
+    enemy2.anchor.setTo(0.5, 0.5)
+    enemy2.body.collideWorldBounds = true;
+    enemy2.alive = true;
+
+    enemy3 = game.add.sprite(450, 150, 'enemy_sprite');
+    game.physics.arcade.enable(enemy3);
+    enemy3.anchor.setTo(0.5, 0.5)
+    enemy3.body.collideWorldBounds = true;
+    enemy3.alive = true;
+
+    enemy4 = game.add.sprite(700, 150, 'enemy_sprite');
+    game.physics.arcade.enable(enemy4);
+    enemy4.anchor.setTo(0.5, 0.5)
+    enemy4.body.collideWorldBounds = true;
+    enemy4.alive = true;
+
+    enemy5 = game.add.sprite(700, 300, 'enemy_sprite');
+    game.physics.arcade.enable(enemy5);
+    enemy5.anchor.setTo(0.5, 0.5)
+    enemy5.body.collideWorldBounds = true;
+    enemy5.alive = true;
+
+    enemy6 = game.add.sprite(150, 450, 'enemy_sprite');
+    game.physics.arcade.enable(enemy6);
+    enemy6.anchor.setTo(0.5, 0.5)
+    enemy6.body.collideWorldBounds = true;
+    enemy6.alive = true;
 
     enemyBullets = game.add.group();
     enemyBullets.enableBody = true;
@@ -166,6 +213,51 @@ function create() {
     enemyBullets.setAll('outOfBoundsKill', true);
     enemyBullets.setAll('checkWorldBounds', true);
 
+    enemyBullets2 = game.add.group();
+    enemyBullets2.enableBody = true;
+    enemyBullets2.physicsBodyType = Phaser.Physics.ARCADE;
+    enemyBullets2.createMultiple(30, 'blackbullet2');
+    enemyBullets2.setAll('anchor.x', 0.5);
+    enemyBullets2.setAll('anchor.y', 0.5);
+    enemyBullets2.setAll('outOfBoundsKill', true);
+    enemyBullets2.setAll('checkWorldBounds', true);
+
+    enemyBullets3 = game.add.group();
+    enemyBullets3.enableBody = true;
+    enemyBullets3.physicsBodyType = Phaser.Physics.ARCADE;
+    enemyBullets3.createMultiple(30, 'blackbullet');
+    enemyBullets3.setAll('anchor.x', 0.5);
+    enemyBullets3.setAll('anchor.y', 0.5);
+    enemyBullets3.setAll('outOfBoundsKill', true);
+    enemyBullets3.setAll('checkWorldBounds', true);
+
+    enemyBullets4 = game.add.group();
+    enemyBullets4.enableBody = true;
+    enemyBullets4.physicsBodyType = Phaser.Physics.ARCADE;
+    enemyBullets4.createMultiple(30, 'blackbullet');
+    enemyBullets4.setAll('anchor.x', 0.5);
+    enemyBullets4.setAll('anchor.y', 0.5);
+    enemyBullets4.setAll('outOfBoundsKill', true);
+    enemyBullets4.setAll('checkWorldBounds', true);
+
+    enemyBullets5 = game.add.group();
+    enemyBullets5.enableBody = true;
+    enemyBullets5.physicsBodyType = Phaser.Physics.ARCADE;
+    enemyBullets5.createMultiple(30, 'blackbullet');
+    enemyBullets5.setAll('anchor.x', 0.5);
+    enemyBullets5.setAll('anchor.y', 0.5);
+    enemyBullets5.setAll('outOfBoundsKill', true);
+    enemyBullets5.setAll('checkWorldBounds', true);
+
+    enemyBullets6 = game.add.group();
+    enemyBullets6.enableBody = true;
+    enemyBullets6.physicsBodyType = Phaser.Physics.ARCADE;
+    enemyBullets6.createMultiple(30, 'blackbullet');
+    enemyBullets6.setAll('anchor.x', 0.5);
+    enemyBullets6.setAll('anchor.y', 0.5);
+    enemyBullets6.setAll('outOfBoundsKill', true);
+    enemyBullets6.setAll('checkWorldBounds', true);
+
     bullets = game.add.group();
     game.physics.arcade.enable(bullets);
     bullets.enableBody = true;
@@ -173,11 +265,7 @@ function create() {
     bullets.setAll('checkWorldBounds', true);
     bullets.setAll('outOfBoundsKill', true);
 
-
-
-    game.camera.follow(player)
-    // game.camera.deadzone = new Phaser.Rectangle(150, 150, 500, 300);
-    // game.camera.focusOnXY(0, 0);
+    game.camera.follow(player);
 
     var NUMBER_OF_WALLS = 3;
     walls = game.add.group();
@@ -189,6 +277,15 @@ function create() {
     }
 
 
+}
+
+function createText() {
+
+    text = game.add.text(20, 20, "Window of Time");
+    text.anchor.setTo(0.5);
+
+    text.font = 'Press Start 2P';
+    text.fontSize = 40;
 }
 
 function createBadGuys(){
@@ -208,32 +305,43 @@ function createBadGuys(){
 
 function update() {
 
+        game.camera.follow(player);
+
+
     player.body.velocity.x = 0;
     player.body.velocity.y = 0;
+    player.rotation = game.physics.arcade.angleToPointer(player)
 
-    enemies.rotation = game.physics.arcade.angleBetween(enemies, player);
+    enemy1.rotation = game.physics.arcade.angleBetween(enemy1, player);
+    enemy2.rotation = game.physics.arcade.angleBetween(enemy2, player);
+    enemy3.rotation = game.physics.arcade.angleBetween(enemy3, player);
+    enemy4.rotation = game.physics.arcade.angleBetween(enemy4, player);
+    enemy5.rotation = game.physics.arcade.angleBetween(enemy5, player);
+    enemy6.rotation = game.physics.arcade.angleBetween(enemy6, player);
 
     game.physics.arcade.collide(player, outerwalls);
     game.physics.arcade.collide(bullets, outerwalls, collisionHandler, null, this);
+    game.physics.arcade.collide(enemy1, bullets, youDead, null, this);
+    game.physics.arcade.collide(enemy2, bullets, youDead2, null, this);
+    game.physics.arcade.collide(enemy3, bullets, youDead3, null, this);
+    game.physics.arcade.collide(enemy4, bullets, youDead4, null, this);
+    game.physics.arcade.collide(enemy5, bullets, youDead5, null, this);
+    game.physics.arcade.collide(enemy6, bullets, youDead6, null, this);
     game.physics.arcade.collide(badGuys, walls);
+    game.physics.arcade.overlap(player, enemy1, defenestrate, null, this)
     game.physics.arcade.collide(enemyBullets, outerwalls, bulletGoAway, null, this);
+    game.physics.arcade.collide(enemyBullets2, outerwalls, bulletGoAway2, null, this);
+    game.physics.arcade.collide(enemyBullets3, outerwalls, bulletGoAway3, null, this);
+    game.physics.arcade.collide(enemyBullets4, outerwalls, bulletGoAway4, null, this);
+    game.physics.arcade.collide(enemyBullets5, outerwalls, bulletGoAway5, null, this);
+    game.physics.arcade.collide(enemyBullets6, outerwalls, bulletGoAway6, null, this);
     game.physics.arcade.overlap(badGuys, bullets, enemyKill, null, this)
 
-    enemiesAlive = 0;
-
-    for (var i = 0; i < enemies.length; i++)
-    {
-        if (enemies[i].alive)
-        {
-            enemiesAlive++;
-            game.physics.arcade.collide(enemies, bullets, enemyKill2, null, this);
-
-        }
-    }
     if (cursors.up.isDown){
         game.time.slowMotion = 1
         player.body.velocity.y = -150;
         player.animations.play('run');
+        slowMoEffect.play();
 
         if (cursors.up.isDown && cursors.right.isDown)
         {
@@ -287,16 +395,16 @@ function update() {
         game.time.slowMotion = 1
         player.animations.play('melee')
     } 
+    else if (meleeKey.isDown && player.is.touching.enemy1){
+        player.animations.play('melee')
+        fire()
+}
     else
     {
-        game.time.slowMotion = 10
+        game.time.slowMotion = 12
         player.animations.stop();
         player.frame = 0;
-
     }
-
-    player.rotation = game.physics.arcade.angleToPointer(player)
-
     if (game.input.activePointer.isDown){
         fire();
     }
@@ -307,6 +415,18 @@ function update() {
 
     bulletPoint = new Phaser.Point(player.x + 29, player.y + 8);
     bulletPoint.rotate(player.x, player.y, player.rotation)
+    enemy1BulletPoint = new Phaser.Point(enemy1.x + 38, enemy1.y + 8)
+    enemy1BulletPoint.rotate(enemy1.x, enemy1.y, enemy1.rotation)
+    enemy2BulletPoint = new Phaser.Point(enemy2.x + 38, enemy2.y + 8)
+    enemy2BulletPoint.rotate(enemy2.x, enemy2.y, enemy2.rotation)
+    enemy3BulletPoint = new Phaser.Point(enemy3.x + 38, enemy3.y + 8)
+    enemy3BulletPoint.rotate(enemy3.x, enemy3.y, enemy3.rotation)
+    enemy4BulletPoint = new Phaser.Point(enemy4.x + 38, enemy4.y + 8)
+    enemy4BulletPoint.rotate(enemy4.x, enemy4.y, enemy4.rotation)
+    enemy5BulletPoint = new Phaser.Point(enemy5.x + 38, enemy5.y + 8)
+    enemy5BulletPoint.rotate(enemy5.x, enemy5.y, enemy5.rotation)
+    enemy6BulletPoint = new Phaser.Point(enemy6.x + 38, enemy6.y + 8)
+    enemy6BulletPoint.rotate(enemy6.x, enemy6.y, enemy6.rotation)
 
     bitmap.context.clearRect(0, 0, this.game.width, this.game.height);
 
@@ -328,6 +448,14 @@ function update() {
     });
 
     bitmap.dirty = true;
+
+    enemy1Shoot();
+    enemy2Shoot();
+    enemy3Shoot();
+    enemy4Shoot();
+    enemy5Shoot();
+    enemy6Shoot();
+
 }
 
 function getWallIntersection(ray){
@@ -363,8 +491,10 @@ function getWallIntersection(ray){
 }
 
 function defenestrate() {
-        player.animations.play('melee');
+    if (meleeKey.isDown){
+        enemy1.y += 100;
     }
+}
 
 function fire() {
     if (game.time.now > nextFire && bullets.countDead() > 0)
@@ -380,12 +510,152 @@ function fire() {
     }
 }
 
+function enemy1Shoot() {
+    if (enemy1.alive == true){
+        if (game.time.now > enemyNextFire && enemyBullets.countDead() > 0)
+        {
+            enemyNextFire = game.time.now + enemyFireRate;
+
+            bullet = enemyBullets.getFirstDead();
+
+            bullet.reset(enemy1BulletPoint.x, enemy1BulletPoint.y);
+
+            game.physics.arcade.moveToObject(bullet, player, 700);
+        }
+    }
+}
+
+function enemy2Shoot() {
+    if (enemy2.alive == true){
+        if (game.time.now > enemyNextFire2 && enemyBullets2.countDead() > 0)
+        {
+            enemyNextFire2 = game.time.now + enemyFireRate;
+
+            bullet = enemyBullets2.getFirstDead();
+
+            bullet.reset(enemy2BulletPoint.x, enemy2BulletPoint.y);
+
+            game.physics.arcade.moveToObject(bullet, player, 700);
+        }
+    }
+}
+
+function enemy3Shoot() {
+    if (enemy3.alive == true){
+        if (game.time.now > enemyNextFire3 && enemyBullets3.countDead() > 0)
+        {
+            enemyNextFire3 = game.time.now + enemyFireRate;
+
+            bullet = enemyBullets3.getFirstDead();
+
+            bullet.reset(enemy3BulletPoint.x, enemy3BulletPoint.y);
+
+            game.physics.arcade.moveToObject(bullet, player, 700);
+        }
+    }
+}
+
+function enemy4Shoot() {
+    if (enemy4.alive == true){
+        if (game.time.now > enemyNextFire4 && enemyBullets4.countDead() > 0)
+        {
+            enemyNextFire4 = game.time.now + enemyFireRate;
+
+            bullet = enemyBullets4.getFirstDead();
+
+            bullet.reset(enemy4BulletPoint.x, enemy4BulletPoint.y);
+
+            game.physics.arcade.moveToObject(bullet, player, 700);
+        }
+    }
+}
+
+function enemy5Shoot() {
+    if (enemy5.alive == true){
+        if (game.time.now > enemyNextFire5 && enemyBullets5.countDead() > 0)
+        {
+            enemyNextFire5 = game.time.now + enemyFireRate;
+
+            bullet = enemyBullets5.getFirstDead();
+
+            bullet.reset(enemy5BulletPoint.x, enemy5BulletPoint.y);
+
+            game.physics.arcade.moveToObject(bullet, player, 700);
+        }
+    }
+}
+
+function enemy6Shoot() {
+    if (enemy6.alive == true){
+        if (game.time.now > enemyNextFire6 && enemyBullets6.countDead() > 0)
+        {
+            enemyNextFire6 = game.time.now + enemyFireRate;
+
+            bullet = enemyBullets6.getFirstDead();
+
+            bullet.reset(enemy6BulletPoint.x, enemy6BulletPoint.y);
+
+            game.physics.arcade.moveToObject(bullet, player, 600);
+        }
+    }
+}
+
 function collisionHandler (bullets, walls) {
     bullets.kill();    
 }
 
+function youDead(enemy1, bullets){
+    enemy1.kill();
+    bullets.kill();
+}
+
+function youDead2(enemy2, bullets){
+    enemy2.kill();
+    bullets.kill();
+}
+
+function youDead3(enemy3, bullets){
+    enemy3.kill();
+    bullets.kill();
+}
+
+function youDead4(enemy4, bullets){
+    enemy4.kill();
+    bullets.kill();
+}
+
+function youDead5(enemy5, bullets){
+    enemy5.kill();
+    bullets.kill();
+}
+
+function youDead6(enemy6, bullets){
+    enemy6.kill();
+    bullets.kill();
+}
+
 function bulletGoAway (enemyBullets, outerwalls){
     enemyBullets.kill()
+}
+
+function bulletGoAway2 (enemyBullets2, outerwalls){
+    enemyBullets2.kill()
+}
+
+function bulletGoAway3 (enemyBullets3, outerwalls){
+    enemyBullets3.kill()
+}
+
+function bulletGoAway4 (enemyBullets4, outerwalls){
+    enemyBullets4.kill()
+}
+
+function bulletGoAway5 (enemyBullets5, outerwalls){
+    enemyBullets5.kill()
+}
+
+function bulletGoAway6 (enemyBullets6, outerwalls){
+    enemyBullets6.kill()
 }
 
 function enemyKill (badGuys, bullets) {
@@ -393,10 +663,7 @@ function enemyKill (badGuys, bullets) {
     badGuys.kill()
 }
 
-function enemyKill2 (enemies, bullets) {
-    bullets.kill()
-    enemies.kill()
-}
+
 
 function enemyFires () {
 
