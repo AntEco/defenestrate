@@ -72,6 +72,7 @@ var menuSong;
 var sloMoEffect;
 var fastMoEffect;
 var shootEffect;
+var gunShot;
 var pauseButton;
 var text = null;
 
@@ -96,6 +97,7 @@ function preload () {
     game.load.audio('slowMoEffect', 'assets/audio/slowmo.mp3');
     game.load.audio('fastMoEffect', 'assets/audio/fastmo.mp3');
     game.load.audio('shootEffect', 'assets/audio/shootEffect.mp3')
+    game.load.audio('gunShot', 'assets/audio/gunshot.mp3')
     game.load.image('pause', 'assets/pause.png');
 
 }
@@ -112,7 +114,9 @@ function create() {
 
     slowMoEffect = game.add.audio('slowMoEffect');
     fastMoEffect = game.add.audio('fastMoEffect');
-    shootEffect = game.add.audio('shootEffect')
+    shootEffect = game.add.audio('shootEffect');
+    gunShot = game.add.audio('gunShot');
+
     
     // pauseButton = game.add.sprite(1120, 20, 'pause');
     // pauseButton.inputEnabled = true;
@@ -329,8 +333,14 @@ function update() {
     enemy6.rotation = game.physics.arcade.angleBetween(enemy6, player);
 
     game.physics.arcade.collide(player, outerwalls);
+    game.physics.arcade.collide(enemy1, outerwalls);
+    game.physics.arcade.collide(enemy2, outerwalls);
+    game.physics.arcade.collide(enemy3, outerwalls);
+    game.physics.arcade.collide(enemy4, outerwalls);
+    game.physics.arcade.collide(enemy5, outerwalls);
+    game.physics.arcade.collide(enemy6, outerwalls);
     game.physics.arcade.collide(bullets, outerwalls, collisionHandler, null, this);
-    game.physics.arcade.overlap(enemy1, bullets, youDead, null, this);
+    game.physics.arcade.collide(enemy1, bullets, youDead1, null, this);
     game.physics.arcade.collide(enemy2, bullets, youDead2, null, this);
     game.physics.arcade.collide(enemy3, bullets, youDead3, null, this);
     game.physics.arcade.collide(enemy4, bullets, youDead4, null, this);
@@ -344,15 +354,7 @@ function update() {
     game.physics.arcade.collide(enemyBullets4, outerwalls, bulletGoAway4, null, this);
     game.physics.arcade.collide(enemyBullets5, outerwalls, bulletGoAway5, null, this);
     game.physics.arcade.collide(enemyBullets6, outerwalls, bulletGoAway6, null, this);
-    game.physics.arcade.overlap(badGuys, bullets, enemyKill, null, this)
-
-    enemy1.animations.play('enemyRun');
-    enemy2.animations.play('enemyRun');
-    enemy3.animations.play('enemyRun');
-    enemy5.animations.play('enemyRun');
-    enemy6.animations.play('enemyRun');
-
-
+    game.physics.arcade.overlap(badGuys, bullets, enemyKill, null, this);
 
     if (cursors.up.isDown){
         game.time.slowMotion = 1
@@ -403,17 +405,17 @@ function update() {
     }
     else if (cursors.right.isDown)
     {
-        game.time.slowMotion = 1
+        game.time.slowMotion = 1;
         player.body.velocity.x = 150;
         player.animations.play('run');
     }
     else if (meleeKey.isDown){
-        game.time.slowMotion = 1
-        player.animations.play('melee')
+        game.time.slowMotion = 1;
+        player.animations.play('melee');
     } 
     else if (meleeKey.isDown && player.is.touching.enemy1){
-        player.animations.play('melee')
-        defenestrate();
+        player.animations.play('melee');
+        player.melee.animations.onAnimationComplete.add(function(){ console.log('this')}, this);
 }
     else
     {
@@ -507,13 +509,19 @@ function getWallIntersection(ray){
 }
 
 function defenestrate() {
-    if (meleeKey.isDown){
+
+    if (player.animations.isFinished == true){
         enemy1.y += 100;
     }
 }
 
 function fire() {
-    shootEffect.play()
+    if (cursors.left.isDown || cursors.right.isDown || cursors.up.isDown || cursors.down.isDown){
+    gunShot.play();
+    }
+    else {
+        shootEffect.play();
+    }
     if (game.time.now > nextFire && bullets.countDead() > 0)
     {
         nextFire = game.time.now + fireRate;
@@ -531,6 +539,7 @@ function enemy1Shoot() {
     if (enemy1.alive == true){
         if (game.time.now > enemyNextFire && enemyBullets.countDead() > 0)
         {
+            enemy1.animations.play('enemyRun');
             enemyNextFire = game.time.now + enemyFireRate;
 
             bullet = enemyBullets.getFirstDead();
@@ -546,6 +555,8 @@ function enemy2Shoot() {
     if (enemy2.alive == true){
         if (game.time.now > enemyNextFire2 && enemyBullets2.countDead() > 0)
         {
+            enemy2.animations.play('enemyRun');
+  
             enemyNextFire2 = game.time.now + enemyFireRate;
 
             bullet = enemyBullets2.getFirstDead();
@@ -561,6 +572,8 @@ function enemy3Shoot() {
     if (enemy3.alive == true){
         if (game.time.now > enemyNextFire3 && enemyBullets3.countDead() > 0)
         {
+            enemy3.animations.play('enemyRun');
+
             enemyNextFire3 = game.time.now + enemyFireRate;
 
             bullet = enemyBullets3.getFirstDead();
@@ -591,6 +604,8 @@ function enemy5Shoot() {
     if (enemy5.alive == true){
         if (game.time.now > enemyNextFire5 && enemyBullets5.countDead() > 0)
         {
+            enemy5.animations.play('enemyRun');
+
             enemyNextFire5 = game.time.now + enemyFireRate;
 
             bullet = enemyBullets5.getFirstDead();
@@ -606,6 +621,8 @@ function enemy6Shoot() {
     if (enemy6.alive == true){
         if (game.time.now > enemyNextFire6 && enemyBullets6.countDead() > 0)
         {
+            enemy6.animations.play('enemyRun');
+
             enemyNextFire6 = game.time.now + enemyFireRate;
 
             bullet = enemyBullets6.getFirstDead();
@@ -621,10 +638,9 @@ function collisionHandler (bullets, walls) {
     bullets.kill();    
 }
 
-function youDead(enemy1, bullets){
+function youDead1(enemy1, bullets){
     enemy1.animations.play('bloodSplatter', 10, false, true);
     bullets.kill();
-
 }
 
 function youDead2(enemy2, bullets){
