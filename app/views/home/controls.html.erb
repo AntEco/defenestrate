@@ -13,9 +13,80 @@
 </head>
 <body>
 
-<div id='menu' style="width:1200px;height:700px;">
-<center><button><a href="/menu">Menu</a></button></center>
-</div>
+<div id='menu' style="width:1200px;height:700px;background-image:url('assets/controlPage.gif');background-size:100%;">
+	<audio autoplay loop><source src="assets/OddLook.mp3" type="audio/mpeg"></audio>
+	<center><button><a href="/menu">Menu</a></button></center>
+	<div id="story">
+		The Story So Far...<br>
+		<div id="content">
+			<br>
+			Blah blah blah blah blah
+		</div>
+	</div>
+	<div id="controlDiv">
+		Controls:<br>
+		<div id="controls">
+			<br>
+			<u>Aim and Shoot:</u><br><br>
+			<img id="compMouse" src="assets/comp_mouse.png">
+			<br><br>
+			<div id="move">
+			<u>Move Player:</u><br><br>
+			<img src="assets/computercursors.png">
+			</div><br>
+			<u>Melee:</u><br><br>
+			<img src="assets/spacebar.png"><br>
+		</div>
+	</div>
+	<script>
 
+function setCookie(c_name,value,exdays)
+{
+    var exdate=new Date();
+    exdate.setDate(exdate.getDate() + exdays);
+    var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+    document.cookie=c_name + "=" + c_value;
+}
+
+function getCookie(c_name)
+{
+    var i,x,y,ARRcookies=document.cookie.split(";");
+    for (i=0;i<ARRcookies.length;i++)
+    {
+      x=ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
+      y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
+      x=x.replace(/^\s+|\s+$/g,"");
+      if (x==c_name)
+        {
+        return unescape(y);
+        }
+      }
+}
+
+var song = document.getElementsByTagName('audio')[0];
+var played = false;
+var tillPlayed = getCookie('timePlayed');
+function update()
+{
+    if(!played){
+        if(tillPlayed){
+        song.currentTime = tillPlayed;
+        song.play();
+        played = true;
+        }
+        else {
+                song.play();
+                played = true;
+        }
+    }
+
+    else {
+    setCookie('timePlayed', song.currentTime);
+    }
+}
+setInterval(update,1000);
+</script>
+
+</div>
     </body>
 </html>

@@ -78,6 +78,7 @@ var enemy6;
 var menuSong;
 var sloMoEffect;
 var fastMoEffect;
+var shootEffect;
 var pauseButton;
 var text = null;
 
@@ -101,7 +102,11 @@ function preload () {
     game.load.audio('menuSong', 'assets/OddLook.mp3');
     game.load.audio('slowMoEffect', 'assets/slowmo.mp3');
     game.load.audio('fastMoEffect', 'assets/fastmo.mp3');
+    game.load.audio('shootEffect', 'assets/shootEffect.mp3')
     game.load.image('pause', 'assets/pause.png');
+    game.load.image('scroll1', 'assets/scroller.gif')
+    game.load.image('scroll2', 'assets/menupage.gif')
+
 
 }
 
@@ -120,6 +125,8 @@ function create() {
     // menuSong.play()
 
     slowMoEffect = game.add.audio('slowMoEffect');
+    fastMoEffect = game.add.audio('fastMoEffect');
+    shootEffect = game.add.audio('shootEffect')
     
     // pauseButton = game.add.sprite(1120, 20, 'pause');
     // pauseButton.inputEnabled = true;
@@ -338,10 +345,10 @@ function update() {
     game.physics.arcade.overlap(badGuys, bullets, enemyKill, null, this)
 
     if (cursors.up.isDown){
+        fastMoEffect.play();
         game.time.slowMotion = 1
         player.body.velocity.y = -150;
         player.animations.play('run');
-        slowMoEffect.play();
 
         if (cursors.up.isDown && cursors.right.isDown)
         {
@@ -455,6 +462,7 @@ function update() {
     enemy4Shoot();
     enemy5Shoot();
     enemy6Shoot();
+    enemyShootSoundEffects();
 
 }
 
@@ -497,6 +505,7 @@ function defenestrate() {
 }
 
 function fire() {
+    shootEffect.play()
     if (game.time.now > nextFire && bullets.countDead() > 0)
     {
         nextFire = game.time.now + fireRate;
@@ -598,6 +607,13 @@ function enemy6Shoot() {
             game.physics.arcade.moveToObject(bullet, player, 600);
         }
     }
+}
+
+function enemyShootSoundEffects() {
+    if (game.time.now > enemyNextFire && enemyBullets4.countDead() > 0)
+        {
+            shootEffect.play();
+        }
 }
 
 function collisionHandler (bullets, walls) {
