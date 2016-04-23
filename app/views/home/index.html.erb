@@ -16,20 +16,6 @@
 
 var game = new Phaser.Game(1200, 700, Phaser.CANVAS, '', { preload: preload, create: create, update: update});
 
-// WebFontConfig = {
-
-//     //  'active' means all requested fonts have finished loading
-//     //  We set a 1 second delay before calling 'createText'.
-//     //  For some reason if we don't the browser cannot render the text the first time it's created.
-//     active: function() { game.time.events.add(Phaser.Timer.SECOND, createText, this); },
-
-//     //  The Google Fonts we want to load (specify as many as you like in the array)
-//     google: {
-//       families: ['Press Start 2P']
-//     }
-
-// };
-
 var player;
 var bulletPoint;
 var testBulletPoint;
@@ -75,6 +61,13 @@ var enemy4;
 var enemy5;
 var enemy6;
 
+var tween1;
+var tween2;
+var tween3;
+var tween4;
+var tween5;
+var tween6;
+
 var menuSong;
 var sloMoEffect;
 var fastMoEffect;
@@ -94,19 +87,16 @@ function preload () {
     game.load.image('tile6', 'assets/tile_436.png');
     game.load.image('block', 'assets/raycastblock.png');
     game.load.atlas('johnwick', 'assets/jsonsprites.png', 'assets/jsonsprites.json');
-    game.load.atlas('enemy_sprite', 'assets/enemy_sprites.png', 'assets/enemy_sprites.json');
+    game.load.atlas('enemy_sprite', 'assets/finalEnemy.png', 'assets/finalEnemy.json');
     game.load.spritesheet('lookupbadguy', 'assets/badguysprite.png', 35, 75, 20);
     game.load.image('bullet', 'assets/bulletred.png');
     game.load.image('blackbullet', 'assets/blackbullet.png');
     game.load.image('blackbullet2', 'assets/blackbullet2.png');
-    game.load.audio('menuSong', 'assets/OddLook.mp3');
-    game.load.audio('slowMoEffect', 'assets/slowmo.mp3');
-    game.load.audio('fastMoEffect', 'assets/fastmo.mp3');
-    game.load.audio('shootEffect', 'assets/shootEffect.mp3')
+    game.load.audio('menuSong', 'assets/audio/OddLook.mp3');
+    game.load.audio('slowMoEffect', 'assets/audio/slowmo.mp3');
+    game.load.audio('fastMoEffect', 'assets/audio/fastmo.mp3');
+    game.load.audio('shootEffect', 'assets/audio/shootEffect.mp3')
     game.load.image('pause', 'assets/pause.png');
-    game.load.image('scroll1', 'assets/scroller.gif')
-    game.load.image('scroll2', 'assets/menupage.gif')
-
 
 }
 
@@ -119,10 +109,6 @@ function create() {
     bitmap.context.fillStyle = '';
     bitmap.context.strokeStyle = 'rgb(255, 255, 255)';
     game.add.image(0, 0, bitmap);
-
-    // menuSong = game.add.audio('menuSong');
-    // menuSong.loop = true;
-    // menuSong.play()
 
     slowMoEffect = game.add.audio('slowMoEffect');
     fastMoEffect = game.add.audio('fastMoEffect');
@@ -180,36 +166,55 @@ function create() {
     enemy1.anchor.setTo(0.5, 0.5)
     enemy1.body.collideWorldBounds = true;
     enemy1.alive = true;
+    enemy1.animations.add('enemyRun', Phaser.Animation.generateFrameNames ('enem', 1, 20), 10, true);
+    enemy1.animations.add('bloodSplatter', Phaser.Animation.generateFrameNames ('splatter_1_000', 1, 7), 10, true);
+    tween1= game.add.tween(enemy1).to( { x: 250 }, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
 
     enemy2 = game.add.sprite(150, 300, 'enemy_sprite');
     game.physics.arcade.enable(enemy2);
     enemy2.anchor.setTo(0.5, 0.5)
     enemy2.body.collideWorldBounds = true;
     enemy2.alive = true;
+    enemy2.animations.add('enemyRun', Phaser.Animation.generateFrameNames ('enem', 1, 20), 10, true);
+    enemy2.animations.add('bloodSplatter', Phaser.Animation.generateFrameNames ('splatter_1_000', 1, 7), 10, true);
+    tween2 = game.add.tween(enemy2).to( { x: 200, y: 350 }, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
 
     enemy3 = game.add.sprite(450, 150, 'enemy_sprite');
     game.physics.arcade.enable(enemy3);
     enemy3.anchor.setTo(0.5, 0.5)
     enemy3.body.collideWorldBounds = true;
     enemy3.alive = true;
+    enemy3.animations.add('enemyRun', Phaser.Animation.generateFrameNames ('enem', 1, 20), 10, true);
+    enemy3.animations.add('bloodSplatter', Phaser.Animation.generateFrameNames ('splatter_1_000', 1, 7), 10, true);
+    tween3 = game.add.tween(enemy3).to( { y: 250 }, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
 
-    enemy4 = game.add.sprite(700, 150, 'enemy_sprite');
+
+    enemy4 = game.add.sprite(700, 150, 'enemy_sprite', 8);
     game.physics.arcade.enable(enemy4);
     enemy4.anchor.setTo(0.5, 0.5)
     enemy4.body.collideWorldBounds = true;
+    enemy4.animations.add('enemyRun', Phaser.Animation.generateFrameNames ('enem', 1, 20), 10, true);
+    enemy4.animations.add('bloodSplatter', Phaser.Animation.generateFrameNames ('splatter_1_000', 1, 7), 10, true);
     enemy4.alive = true;
 
-    enemy5 = game.add.sprite(700, 300, 'enemy_sprite');
+    enemy5 = game.add.sprite(700, 300, 'enemy_sprite', 8);
     game.physics.arcade.enable(enemy5);
     enemy5.anchor.setTo(0.5, 0.5)
     enemy5.body.collideWorldBounds = true;
     enemy5.alive = true;
+    enemy5.animations.add('enemyRun', Phaser.Animation.generateFrameNames ('enem', 1, 20), 10, true);
+    enemy5.animations.add('bloodSplatter', Phaser.Animation.generateFrameNames ('splatter_1_000', 1, 7), 10, true);
+    tween5 = game.add.tween(enemy5).to( { y: 400 }, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
 
     enemy6 = game.add.sprite(150, 450, 'enemy_sprite');
     game.physics.arcade.enable(enemy6);
     enemy6.anchor.setTo(0.5, 0.5)
     enemy6.body.collideWorldBounds = true;
     enemy6.alive = true;
+    enemy6.animations.add('enemyRun', Phaser.Animation.generateFrameNames ('enem', 1, 20), 10, true);
+    enemy6.animations.add('bloodSplatter', Phaser.Animation.generateFrameNames ('splatter_1_000', 1, 7), 10, true);
+    tween6 = game.add.tween(enemy6).to( { y: 550 }, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
+
 
     enemyBullets = game.add.group();
     enemyBullets.enableBody = true;
@@ -312,9 +317,6 @@ function createBadGuys(){
 
 function update() {
 
-        game.camera.follow(player);
-
-
     player.body.velocity.x = 0;
     player.body.velocity.y = 0;
     player.rotation = game.physics.arcade.angleToPointer(player)
@@ -328,7 +330,7 @@ function update() {
 
     game.physics.arcade.collide(player, outerwalls);
     game.physics.arcade.collide(bullets, outerwalls, collisionHandler, null, this);
-    game.physics.arcade.collide(enemy1, bullets, youDead, null, this);
+    game.physics.arcade.overlap(enemy1, bullets, youDead, null, this);
     game.physics.arcade.collide(enemy2, bullets, youDead2, null, this);
     game.physics.arcade.collide(enemy3, bullets, youDead3, null, this);
     game.physics.arcade.collide(enemy4, bullets, youDead4, null, this);
@@ -344,8 +346,15 @@ function update() {
     game.physics.arcade.collide(enemyBullets6, outerwalls, bulletGoAway6, null, this);
     game.physics.arcade.overlap(badGuys, bullets, enemyKill, null, this)
 
+    enemy1.animations.play('enemyRun');
+    enemy2.animations.play('enemyRun');
+    enemy3.animations.play('enemyRun');
+    enemy5.animations.play('enemyRun');
+    enemy6.animations.play('enemyRun');
+
+
+
     if (cursors.up.isDown){
-        fastMoEffect.play();
         game.time.slowMotion = 1
         player.body.velocity.y = -150;
         player.animations.play('run');
@@ -404,7 +413,7 @@ function update() {
     } 
     else if (meleeKey.isDown && player.is.touching.enemy1){
         player.animations.play('melee')
-        fire()
+        defenestrate();
 }
     else
     {
@@ -416,9 +425,9 @@ function update() {
         fire();
     }
 
-    if (meleeKey.isDown){
-        defenestrate();
+    if (cursors.left.isDown == false && cursors.down.isDown == false && cursors.right.isDown == false && cursors.up.isDown == false){fastMoEffect.play();
     }
+
 
     bulletPoint = new Phaser.Point(player.x + 29, player.y + 8);
     bulletPoint.rotate(player.x, player.y, player.rotation)
@@ -462,7 +471,6 @@ function update() {
     enemy4Shoot();
     enemy5Shoot();
     enemy6Shoot();
-    enemyShootSoundEffects();
 
 }
 
@@ -609,44 +617,38 @@ function enemy6Shoot() {
     }
 }
 
-function enemyShootSoundEffects() {
-    if (game.time.now > enemyNextFire && enemyBullets4.countDead() > 0)
-        {
-            shootEffect.play();
-        }
-}
-
 function collisionHandler (bullets, walls) {
     bullets.kill();    
 }
 
 function youDead(enemy1, bullets){
-    enemy1.kill();
+    enemy1.animations.play('bloodSplatter', 10, false, true);
     bullets.kill();
+
 }
 
 function youDead2(enemy2, bullets){
-    enemy2.kill();
+    enemy2.animations.play('bloodSplatter', 10, false, true);
     bullets.kill();
 }
 
 function youDead3(enemy3, bullets){
-    enemy3.kill();
+    enemy3.animations.play('bloodSplatter', 10, false, true);
     bullets.kill();
 }
 
 function youDead4(enemy4, bullets){
-    enemy4.kill();
+    enemy4.animations.play('bloodSplatter', 10, false, true);
     bullets.kill();
 }
 
 function youDead5(enemy5, bullets){
-    enemy5.kill();
+    enemy5.animations.play('bloodSplatter', 10, false, true);
     bullets.kill();
 }
 
 function youDead6(enemy6, bullets){
-    enemy6.kill();
+    enemy6.animations.play('bloodSplatter', 10, false, true);
     bullets.kill();
 }
 
