@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>Defenestrate</title>
     <script type="text/javascript" src="assets/phaser.min.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
     <style type="text/css">
         body {
             margin: 0;
@@ -11,6 +12,7 @@
     </style>
 </head>
 <body>
+<div style="font-family: 'Press Start 2P', cursive; position:absolute; left:-10000px">Font Loaded</div>
 
 <script type="text/javascript">
 
@@ -34,6 +36,8 @@ var nextFire = 1;
 var bullet;
 
 var badGuys;
+
+var defenestrateAnimate;
 
 var enemyBullets;
 var enemyBullets2;
@@ -75,7 +79,9 @@ var shootEffect;
 var gunShot;
 var pauseButton;
 var text = null;
-
+var score = 0;
+var scoreString;
+var scoreText;
 
 function preload () {
     // game.load.script('webfont', '//fonts.googleapis.com/css?family=Press+Start+2P');
@@ -86,10 +92,12 @@ function preload () {
     game.load.image('tile4', 'assets/tile_435.png');
     game.load.image('tile5', 'assets/tile_20.png');
     game.load.image('tile6', 'assets/tile_436.png');
+    game.load.image('sidewalk', 'assets/sidewalkBackground.png')
     game.load.image('block', 'assets/raycastblock.png');
     game.load.atlas('johnwick', 'assets/jsonsprites.png', 'assets/jsonsprites.json');
     game.load.atlas('enemy_sprite', 'assets/finalEnemy.png', 'assets/finalEnemy.json');
-    game.load.spritesheet('lookupbadguy', 'assets/badguysprite.png', 35, 75, 20);
+    game.load.spritesheet('lookupbadguy', 'assets/badguysprite.png', 35, 70, 20);
+    game.load.atlas('defenestrateAnimate', 'assets/boss.png', "assets/boss.json")
     game.load.image('bullet', 'assets/bulletred.png');
     game.load.image('blackbullet', 'assets/blackbullet.png');
     game.load.image('blackbullet2', 'assets/blackbullet2.png');
@@ -105,7 +113,9 @@ function preload () {
 function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
-    game.stage.backgroundColor = '#00000';
+    // game.stage.backgroundColor = '#00000';
+
+    game.add.tileSprite(0, 0, 1200, 700, 'sidewalk');
 
     bitmap = game.add.bitmapData(game.width, game.height);
     bitmap.context.fillStyle = '';
@@ -164,6 +174,11 @@ function create() {
     player.animations.add('run', Phaser.Animation.generateFrameNames ('run', 1, 19), 22, true);
     player.animations.add('melee', Phaser.Animation.generateFrameNames('hit', 1, 15), 18, true);
     player.bringToTop();
+
+    defenestrateAnimate = game.add.sprite(920, 650, 'defenestrateAnimate');
+    game.physics.arcade.enable(defenestrateAnimate);
+    player.anchor.setTo(0.5, 0.5)
+    defenestrateAnimate.animations.add('falling', Phaser.Animation.generateFrameNames ('badguy', 0, 12), 10, false);
 
     enemy1 = game.add.sprite(150, 150, 'enemy_sprite');
     game.physics.arcade.enable(enemy1);
@@ -292,6 +307,9 @@ function create() {
         game.add.image(x, y, 'block', 0, walls).scale.setTo(.5, 8);
     }
 
+    scoreString = 'Score : ';
+    scoreText = game.add.text(1000, 10, scoreString + score, { fill: '#fff' });
+
 
 }
 
@@ -306,17 +324,16 @@ function createText() {
 
 function createBadGuys(){
 
-    for (var y = 0; y < 2; y++)
+    for (var y = 0; y < 1; y++)
     {
         for (var x = 0; x < 1; x++){
             var badGuy = badGuys.create(x, y * 250, 'lookupbadguy');
-            badGuy.animations.add('badGuyRun', Phaser.Animation.generateFrameNames ('badguy', 1, 19), 22, true);
-            badGuy.anchor.setTo(0.5, .5)
+            badGuy.anchor.setTo(0.5, 0.5)
 
         }
     }
     badGuys.x = 920
-    badGuys.y = 280
+    badGuys.y = 520
 }
 
 function update() {
@@ -331,6 +348,7 @@ function update() {
     enemy4.rotation = game.physics.arcade.angleBetween(enemy4, player);
     enemy5.rotation = game.physics.arcade.angleBetween(enemy5, player);
     enemy6.rotation = game.physics.arcade.angleBetween(enemy6, player);
+    
 
     game.physics.arcade.collide(player, outerwalls);
     game.physics.arcade.collide(enemy1, outerwalls);
@@ -347,14 +365,15 @@ function update() {
     game.physics.arcade.collide(enemy5, bullets, youDead5, null, this);
     game.physics.arcade.collide(enemy6, bullets, youDead6, null, this);
     game.physics.arcade.collide(badGuys, walls);
-    game.physics.arcade.overlap(player, enemy1, defenestrate, null, this)
+    game.physics.arcade.overlap(player, badGuys, defenestrate, null, this)
+    // game.physics.arcade.overlap(badGuys, windows, fallOutWindow, null, this)
     game.physics.arcade.collide(enemyBullets, outerwalls, bulletGoAway, null, this);
     game.physics.arcade.collide(enemyBullets2, outerwalls, bulletGoAway2, null, this);
     game.physics.arcade.collide(enemyBullets3, outerwalls, bulletGoAway3, null, this);
     game.physics.arcade.collide(enemyBullets4, outerwalls, bulletGoAway4, null, this);
     game.physics.arcade.collide(enemyBullets5, outerwalls, bulletGoAway5, null, this);
     game.physics.arcade.collide(enemyBullets6, outerwalls, bulletGoAway6, null, this);
-    game.physics.arcade.overlap(badGuys, bullets, enemyKill, null, this);
+    // game.physics.arcade.overlap(badGuys, bullets, enemyKill, null, this);
 
     if (cursors.up.isDown){
         game.time.slowMotion = 1
@@ -427,7 +446,8 @@ function update() {
         fire();
     }
 
-    if (cursors.left.isDown == false && cursors.down.isDown == false && cursors.right.isDown == false && cursors.up.isDown == false){fastMoEffect.play();
+    if (cursors.left.isDown == true && cursors.down.isDown == true && cursors.right.isDown == true && cursors.up.isDown == true){
+        fastMoEffect.play();
     }
 
 
@@ -474,6 +494,9 @@ function update() {
     enemy5Shoot();
     enemy6Shoot();
 
+    
+
+
 }
 
 function getWallIntersection(ray){
@@ -499,6 +522,7 @@ function getWallIntersection(ray){
                 if (distance < distanceToWall) {
                     distanceToWall = distance;
                     closestIntersection = intersect;
+                    badGuys.rotation = game.physics.arcade.angleBetween(badGuys, player);
                     enemyFires();
                 }
             }
@@ -508,12 +532,21 @@ function getWallIntersection(ray){
 
 }
 
-function defenestrate() {
+function defenestrate(player, badGuys) {
 
-    if (player.animations.isFinished == true){
-        enemy1.y += 100;
+    if (meleeKey.isDown){
+        badGuys.y += 200;
+        badGuys.kill();
+        defenestrateAnimate.animations.play('falling');
     }
+    // 
 }
+
+// function fallOutWindow(badGuys, windows) {
+
+//     // badGuys.animations.play('falling')
+
+// }
 
 function fire() {
     if (cursors.left.isDown || cursors.right.isDown || cursors.up.isDown || cursors.down.isDown){
@@ -641,31 +674,43 @@ function collisionHandler (bullets, walls) {
 function youDead1(enemy1, bullets){
     enemy1.animations.play('bloodSplatter', 10, false, true);
     bullets.kill();
+    score += 100;
+    scoreText.text = scoreString + score;
 }
 
 function youDead2(enemy2, bullets){
     enemy2.animations.play('bloodSplatter', 10, false, true);
     bullets.kill();
+    score += 100;
+    scoreText.text = scoreString + score;
 }
 
 function youDead3(enemy3, bullets){
     enemy3.animations.play('bloodSplatter', 10, false, true);
     bullets.kill();
+    score += 100;
+    scoreText.text = scoreString + score;
 }
 
 function youDead4(enemy4, bullets){
     enemy4.animations.play('bloodSplatter', 10, false, true);
     bullets.kill();
+    score += 100;
+    scoreText.text = scoreString + score;
 }
 
 function youDead5(enemy5, bullets){
     enemy5.animations.play('bloodSplatter', 10, false, true);
     bullets.kill();
+    score += 100;
+    scoreText.text = scoreString + score;
 }
 
 function youDead6(enemy6, bullets){
     enemy6.animations.play('bloodSplatter', 10, false, true);
     bullets.kill();
+    score += 100;
+    scoreText.text = scoreString + score;
 }
 
 function bulletGoAway (enemyBullets, outerwalls){

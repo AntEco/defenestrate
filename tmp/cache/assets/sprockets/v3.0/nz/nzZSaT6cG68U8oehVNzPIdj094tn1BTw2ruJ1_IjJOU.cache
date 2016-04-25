@@ -1,0 +1,9 @@
+{:uriI"‡file://app/assets/fontSquirrel/generator_config.txt?type=text/plain&id=f7910d6376033c10c0dbd8d9fa0c864576d19d8a136b8fe16c72cb9a404c58a9:ET:load_pathI"app/assets/fontSquirrel;T:filenameI"1app/assets/fontSquirrel/generator_config.txt;T:	nameI"generator_config;T:logical_pathI"generator_config.txt;T:content_typeI"text/plain;T:sourceI"m# Font Squirrel Font-face Generator Configuration File
+# Upload this file to the generator to recreate the settings
+# you used to create these fonts.
+
+{"mode":"optimal","formats":["ttf","woff","woff2","eotz"],"tt_instructor":"default","fix_gasp":"xy","fix_vertical_metrics":"Y","metrics_ascent":"","metrics_descent":"","metrics_linegap":"","add_spaces":"Y","add_hyphens":"Y","fallback":"none","fallback_custom":"100","options_subset":"basic","subset_custom":"","subset_custom_range":"","subset_ot_features_list":"","css_stylesheet":"stylesheet.css","filename_suffix":"-webfont","emsquare":"2048","spacing_adjustment":"0"};T:metadata{	:dependencieso:Set:
+@hash{
+I"environment-version;TTI"environment-paths;TTI"rails-env;TTI"4processors:type=text/plain&file_type=text/plain;TTI"?file-digest://app/assets/fontSquirrel/generator_config.txt;TT:charsetI"
+utf-8;F:digest"%kÿR¾ªë¦”´òÔ‰”á·FÀ•SÚµ,Wus/›„ç¯:lengthim:dependencies_digest"%o'´=£‚<Â'‚¹‘Tlo¤SÜ}"Àaü¶¤19ý:idI"Ef7910d6376033c10c0dbd8d9fa0c864576d19d8a136b8fe16c72cb9a404c58a9;F:
+mtimel+: W
