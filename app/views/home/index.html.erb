@@ -78,10 +78,13 @@ var fastMoEffect;
 var shootEffect;
 var gunShot;
 var pauseButton;
+
 var text = null;
 var score = 0;
 var scoreString;
 var scoreText;
+var titleText;
+var levelText;
 var addScore;
 
 function preload () {
@@ -93,7 +96,7 @@ function preload () {
     game.load.image('tile4', 'assets/tile_435.png');
     game.load.image('tile5', 'assets/tile_20.png');
     game.load.image('tile6', 'assets/tile_436.png');
-    game.load.image('sidewalk', 'assets/sidewalkBackground.png')
+    game.load.image('sidewalk', 'assets/finalmapbackground2.png')
     game.load.image('block', 'assets/raycastblock.png');
     game.load.atlas('johnwick', 'assets/jsonsprites.png', 'assets/jsonsprites.json');
     game.load.atlas('enemy_sprite', 'assets/finalEnemy.png', 'assets/finalEnemy.json');
@@ -296,17 +299,10 @@ function create() {
     }
 
     scoreString = 'Score : ';
-    scoreText = game.add.text(1000, 10, scoreString + score, { fill: '#fff' });
+    scoreText = game.add.text(1000, 4, scoreString + score, { fill: '#fff' });
+    titleText = game.add.text(10, 4, "Window of Time", {fill: '#fff'});
+    levelText = game.add.text(500, 4, "Level - 1", {fill: "#fff"});
 
-}
-
-function createText() {
-
-    text = game.add.text(20, 20, "Window of Time", {fill: '#fff'});
-    text.anchor.setTo(0.5);
-
-    text.font = 'Press Start 2P';
-    text.fontSize = 40;
 }
 
 function createBadGuys(){
@@ -328,6 +324,8 @@ function update() {
     player.body.velocity.x = 0;
     player.body.velocity.y = 0;
     player.rotation = game.physics.arcade.angleToPointer(player)
+
+
 
     enemy1.rotation = game.physics.arcade.angleBetween(enemy1, player);
     enemy2.rotation = game.physics.arcade.angleBetween(enemy2, player);
