@@ -82,6 +82,7 @@ var text = null;
 var score = 0;
 var scoreString;
 var scoreText;
+var addScore;
 
 function preload () {
     // game.load.script('webfont', '//fonts.googleapis.com/css?family=Press+Start+2P');
@@ -96,8 +97,8 @@ function preload () {
     game.load.image('block', 'assets/raycastblock.png');
     game.load.atlas('johnwick', 'assets/jsonsprites.png', 'assets/jsonsprites.json');
     game.load.atlas('enemy_sprite', 'assets/finalEnemy.png', 'assets/finalEnemy.json');
-    game.load.spritesheet('lookupbadguy', 'assets/badguysprite.png', 35, 70, 20);
-    game.load.atlas('defenestrateAnimate', 'assets/boss.png', "assets/boss.json")
+    game.load.spritesheet('lookupbadguy', 'assets/bossEnemy.png', 100, 47);
+    game.load.atlas('defenestrateAnimate', 'assets/theBoss.png', "assets/theBoss.json")
     game.load.image('bullet', 'assets/bulletred.png');
     game.load.image('blackbullet', 'assets/blackbullet.png');
     game.load.image('blackbullet2', 'assets/blackbullet2.png');
@@ -126,19 +127,6 @@ function create() {
     fastMoEffect = game.add.audio('fastMoEffect');
     shootEffect = game.add.audio('shootEffect');
     gunShot = game.add.audio('gunShot');
-
-    
-    // pauseButton = game.add.sprite(1120, 20, 'pause');
-    // pauseButton.inputEnabled = true;
-    // pauseButton.events.onInputUp.add(function () {
-    //     game.paused = true;
-    // });
-    // pauseButton.events.onInputDown.add(function () {
-    //     if (game.paused = true){
-    //         game.paused = false;
-    //     }
-    // });
-
 
     cursors = game.input.keyboard.createCursorKeys();
     meleeKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -175,10 +163,10 @@ function create() {
     player.animations.add('melee', Phaser.Animation.generateFrameNames('hit', 1, 15), 18, true);
     player.bringToTop();
 
-    defenestrateAnimate = game.add.sprite(920, 650, 'defenestrateAnimate');
+    defenestrateAnimate = game.add.sprite(1100, 450, 'defenestrateAnimate');
     game.physics.arcade.enable(defenestrateAnimate);
     player.anchor.setTo(0.5, 0.5)
-    defenestrateAnimate.animations.add('falling', Phaser.Animation.generateFrameNames ('badguy', 0, 12), 10, false);
+    defenestrateAnimate.animations.add('falling', Phaser.Animation.generateFrameNames ('bloodSplat_', 0, 11), 11, false);
 
     enemy1 = game.add.sprite(150, 150, 'enemy_sprite');
     game.physics.arcade.enable(enemy1);
@@ -310,12 +298,11 @@ function create() {
     scoreString = 'Score : ';
     scoreText = game.add.text(1000, 10, scoreString + score, { fill: '#fff' });
 
-
 }
 
 function createText() {
 
-    text = game.add.text(20, 20, "Window of Time");
+    text = game.add.text(20, 20, "Window of Time", {fill: '#fff'});
     text.anchor.setTo(0.5);
 
     text.font = 'Press Start 2P';
@@ -332,8 +319,8 @@ function createBadGuys(){
 
         }
     }
-    badGuys.x = 920
-    badGuys.y = 520
+    badGuys.x = 980
+    badGuys.y = 460
 }
 
 function update() {
@@ -373,7 +360,7 @@ function update() {
     game.physics.arcade.collide(enemyBullets4, outerwalls, bulletGoAway4, null, this);
     game.physics.arcade.collide(enemyBullets5, outerwalls, bulletGoAway5, null, this);
     game.physics.arcade.collide(enemyBullets6, outerwalls, bulletGoAway6, null, this);
-    // game.physics.arcade.overlap(badGuys, bullets, enemyKill, null, this);
+    game.physics.arcade.overlap(badGuys, bullets, enemyKill, null, this);
 
     if (cursors.up.isDown){
         game.time.slowMotion = 1
@@ -452,19 +439,19 @@ function update() {
 
 
     bulletPoint = new Phaser.Point(player.x + 29, player.y + 8);
-    bulletPoint.rotate(player.x, player.y, player.rotation)
-    enemy1BulletPoint = new Phaser.Point(enemy1.x + 38, enemy1.y + 8)
-    enemy1BulletPoint.rotate(enemy1.x, enemy1.y, enemy1.rotation)
-    enemy2BulletPoint = new Phaser.Point(enemy2.x + 38, enemy2.y + 8)
-    enemy2BulletPoint.rotate(enemy2.x, enemy2.y, enemy2.rotation)
-    enemy3BulletPoint = new Phaser.Point(enemy3.x + 38, enemy3.y + 8)
-    enemy3BulletPoint.rotate(enemy3.x, enemy3.y, enemy3.rotation)
-    enemy4BulletPoint = new Phaser.Point(enemy4.x + 38, enemy4.y + 8)
-    enemy4BulletPoint.rotate(enemy4.x, enemy4.y, enemy4.rotation)
-    enemy5BulletPoint = new Phaser.Point(enemy5.x + 38, enemy5.y + 8)
-    enemy5BulletPoint.rotate(enemy5.x, enemy5.y, enemy5.rotation)
-    enemy6BulletPoint = new Phaser.Point(enemy6.x + 38, enemy6.y + 8)
-    enemy6BulletPoint.rotate(enemy6.x, enemy6.y, enemy6.rotation)
+    bulletPoint.rotate(player.x, player.y, player.rotation);
+    enemy1BulletPoint = new Phaser.Point(enemy1.x + 38, enemy1.y + 8);
+    enemy1BulletPoint.rotate(enemy1.x, enemy1.y, enemy1.rotation);
+    enemy2BulletPoint = new Phaser.Point(enemy2.x + 38, enemy2.y + 8);
+    enemy2BulletPoint.rotate(enemy2.x, enemy2.y, enemy2.rotation);
+    enemy3BulletPoint = new Phaser.Point(enemy3.x + 38, enemy3.y + 8);
+    enemy3BulletPoint.rotate(enemy3.x, enemy3.y, enemy3.rotation);
+    enemy4BulletPoint = new Phaser.Point(enemy4.x + 38, enemy4.y + 8);
+    enemy4BulletPoint.rotate(enemy4.x, enemy4.y, enemy4.rotation);
+    enemy5BulletPoint = new Phaser.Point(enemy5.x + 38, enemy5.y + 8);
+    enemy5BulletPoint.rotate(enemy5.x, enemy5.y, enemy5.rotation);
+    enemy6BulletPoint = new Phaser.Point(enemy6.x + 38, enemy6.y + 8);
+    enemy6BulletPoint.rotate(enemy6.x, enemy6.y, enemy6.rotation);
 
     bitmap.context.clearRect(0, 0, this.game.width, this.game.height);
 
@@ -538,15 +525,14 @@ function defenestrate(player, badGuys) {
         badGuys.y += 200;
         badGuys.kill();
         defenestrateAnimate.animations.play('falling');
+        score += 500;
+        scoreText.text = scoreString + score;
+        var addScore = game.add.text(defenestrateAnimate.x - 150, defenestrateAnimate.y, "DEFENESTRATION", { fill: '#00000', "text-shadow": "-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;" });
+        game.add.tween(addScore).to({y: defenestrateAnimate.y -100 }, 1500, Phaser.Easing.Linear.None, true);
+        game.add.tween(addScore).to({alpha: 0}, 1500, Phaser.Easing.Linear.None, true);
     }
-    // 
+    
 }
-
-// function fallOutWindow(badGuys, windows) {
-
-//     // badGuys.animations.play('falling')
-
-// }
 
 function fire() {
     if (cursors.left.isDown || cursors.right.isDown || cursors.up.isDown || cursors.down.isDown){
@@ -675,7 +661,12 @@ function youDead1(enemy1, bullets){
     enemy1.animations.play('bloodSplatter', 10, false, true);
     bullets.kill();
     score += 100;
-    scoreText.text = scoreString + score;
+    scoreText.text = scoreString + score;  
+    var addScore = game.add.text(enemy1.x - 50, enemy1.y - 50, "+100", { fill: '#00000', "text-shadow": "-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;" });
+    game.add.tween(addScore).to({y: enemy1.y - 100 }, 1500, Phaser.Easing.Linear.None, true);
+    game.add.tween(addScore).to({alpha: 0}, 1500, Phaser.Easing.Linear.None, true);
+    
+
 }
 
 function youDead2(enemy2, bullets){
@@ -683,6 +674,9 @@ function youDead2(enemy2, bullets){
     bullets.kill();
     score += 100;
     scoreText.text = scoreString + score;
+    var addScore = game.add.text(enemy2.x - 50, enemy2.y - 50, "+100", { fill: '#00000', "text-shadow": "-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;" });
+    game.add.tween(addScore).to({y: enemy2.y - 100 }, 1500, Phaser.Easing.Linear.None, true);
+    game.add.tween(addScore).to({alpha: 0}, 1500, Phaser.Easing.Linear.None, true);
 }
 
 function youDead3(enemy3, bullets){
@@ -690,6 +684,9 @@ function youDead3(enemy3, bullets){
     bullets.kill();
     score += 100;
     scoreText.text = scoreString + score;
+    var addScore = game.add.text(enemy3.x - 50, enemy3.y - 50, "+100", { fill: '#00000', "text-shadow": "-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;" });
+    game.add.tween(addScore).to({y: enemy3.y - 100 }, 1500, Phaser.Easing.Linear.None, true);
+    game.add.tween(addScore).to({alpha: 0}, 1500, Phaser.Easing.Linear.None, true);
 }
 
 function youDead4(enemy4, bullets){
@@ -697,6 +694,9 @@ function youDead4(enemy4, bullets){
     bullets.kill();
     score += 100;
     scoreText.text = scoreString + score;
+    var addScore = game.add.text(enemy4.x - 50, enemy4.y - 50, "+100", { fill: '#00000', "text-shadow": "-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;" });
+    game.add.tween(addScore).to({y: enemy4.y - 100 }, 1500, Phaser.Easing.Linear.None, true);
+    game.add.tween(addScore).to({alpha: 0}, 1500, Phaser.Easing.Linear.None, true);
 }
 
 function youDead5(enemy5, bullets){
@@ -704,6 +704,9 @@ function youDead5(enemy5, bullets){
     bullets.kill();
     score += 100;
     scoreText.text = scoreString + score;
+    var addScore = game.add.text(enemy5.x - 50, enemy5.y - 50, "+100", { fill: '#00000', "text-shadow": "-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;" });
+    game.add.tween(addScore).to({y: enemy5.y - 100 }, 1500, Phaser.Easing.Linear.None, true);
+    game.add.tween(addScore).to({alpha: 0}, 1500, Phaser.Easing.Linear.None, true);
 }
 
 function youDead6(enemy6, bullets){
@@ -711,6 +714,9 @@ function youDead6(enemy6, bullets){
     bullets.kill();
     score += 100;
     scoreText.text = scoreString + score;
+    var addScore = game.add.text(enemy6.x - 50, enemy6.y - 50, "+100", { fill: '#00000', "text-shadow": "-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;" });
+    game.add.tween(addScore).to({y: enemy6.y - 100 }, 1500, Phaser.Easing.Linear.None, true);
+    game.add.tween(addScore).to({alpha: 0}, 1500, Phaser.Easing.Linear.None, true);
 }
 
 function bulletGoAway (enemyBullets, outerwalls){
@@ -739,7 +745,6 @@ function bulletGoAway6 (enemyBullets6, outerwalls){
 
 function enemyKill (badGuys, bullets) {
     bullets.kill()
-    badGuys.kill()
 }
 
 
@@ -767,8 +772,9 @@ if (game.time.now > enemyNextFire && enemyBullets.countDead() && livingEnemies.l
 
         // randomly select one of them
         var shooter=livingEnemies[random];
+        
         // And fire the bullet from this enemy
-        enemyBullet.reset(shooter.body.x, shooter.body.y);
+        enemyBullet.reset(shooter.body.x + 57, shooter.body.y -43);
 
         game.physics.arcade.moveToObject(enemyBullet, player, 500);
         firingTimer = game.time.now + 200;
