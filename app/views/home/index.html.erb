@@ -136,12 +136,12 @@ function create() {
     fastMoEffect = game.add.audio('fastMoEffect');
     shootEffect = game.add.audio('shootEffect');
     gunShot = game.add.audio('gunShot');
-    menuSong = game.add.audio('menuSong');
-    shootEffect.volume = 1;
-    gunShot.volume = .18
-    menuSong.volume = .1
-    menuSong.loop = true;
-    menuSong.play();
+    // menuSong = game.add.audio('menuSong');
+    // shootEffect.volume = 1;
+    // gunShot.volume = .18
+    // menuSong.volume = .1
+    // menuSong.loop = true;
+    // menuSong.play();
     slowMoEffect.allowMultiple = false;
 
     cursors = game.input.keyboard.createCursorKeys();
@@ -377,12 +377,12 @@ function update() {
     game.physics.arcade.collide(enemyBullets5, outerwalls, bulletGoAway5, null, this);
     game.physics.arcade.collide(enemyBullets6, outerwalls, bulletGoAway6, null, this);
     game.physics.arcade.overlap(badGuys, bullets, enemyKill, null, this);
-    game.physics.arcade.overlap(enemyBullets, player, playerKill1, null, this);
-    game.physics.arcade.overlap(enemyBullets2, player, playerKill2, null, this);
-    game.physics.arcade.overlap(enemyBullets3, player, playerKill3, null, this);
-    game.physics.arcade.overlap(enemyBullets4, player, playerKill4, null, this);
-    game.physics.arcade.overlap(enemyBullets5, player, playerKill5, null, this);
-    game.physics.arcade.overlap(enemyBullets6, player, playerKill6, null, this);
+    // game.physics.arcade.overlap(enemyBullets, player, playerKill1, null, this);
+    // game.physics.arcade.overlap(enemyBullets2, player, playerKill2, null, this);
+    // game.physics.arcade.overlap(enemyBullets3, player, playerKill3, null, this);
+    // game.physics.arcade.overlap(enemyBullets4, player, playerKill4, null, this);
+    // game.physics.arcade.overlap(enemyBullets5, player, playerKill5, null, this);
+    // game.physics.arcade.overlap(enemyBullets6, player, playerKill6, null, this);
     game.physics.arcade.overlap(enemyBullets, bullets, bulletKill1, null, this);
     game.physics.arcade.overlap(enemyBullets2, bullets, bulletKill2, null, this);
     game.physics.arcade.overlap(enemyBullets3, bullets, bulletKill3, null, this);
@@ -459,9 +459,6 @@ function update() {
         fire();
     }
 
-    
-
-
     bulletPoint = new Phaser.Point(player.x + 29, player.y + 8);
     bulletPoint.rotate(player.x, player.y, player.rotation);
     enemy1BulletPoint = new Phaser.Point(enemy1.x + 38, enemy1.y + 8);
@@ -476,6 +473,8 @@ function update() {
     enemy5BulletPoint.rotate(enemy5.x, enemy5.y, enemy5.rotation);
     enemy6BulletPoint = new Phaser.Point(enemy6.x + 38, enemy6.y + 8);
     enemy6BulletPoint.rotate(enemy6.x, enemy6.y, enemy6.rotation);
+    bossBulletPoint = new Phaser.Point(badGuys.x + 60, badGuys.y + 10);
+    bossBulletPoint.rotate(badGuys.x, badGuys.y, badGuys.rotation);
 
     bitmap.context.clearRect(0, 0, this.game.width, this.game.height);
 
@@ -533,11 +532,11 @@ function getWallIntersection(ray){
                 // Find the closest intersection
                 distance =
                     game.math.distance(ray.start.x, ray.start.y, intersect.x, intersect.y);
-                if (distance < distanceToWall) {
+                if (distance < distanceToWall && badGuys.alive == true) {
                     distanceToWall = distance;
                     closestIntersection = intersect;
                     badGuys.rotation = game.physics.arcade.angleBetween(badGuys, player);
-                    enemyFires();
+                    bossShoots();
                 }
             }
         }
@@ -574,7 +573,6 @@ function defenestrate(player, badGuys) {
                 youwin.align = 'center';
              }
         }    
-    
 }
 
 function slowMoPlayer() {
@@ -683,6 +681,23 @@ function enemy6Shoot() {
 
             game.physics.arcade.moveToObject(bullet, player, 450);
         }
+    }
+}
+
+function bossShoots() {
+
+    enemyBullet = enemyBullets.getFirstExists(false);
+    livingEnemies.length=0;
+    badGuys.forEachAlive(function(badGuy){
+        livingEnemies.push(badGuy);
+    });
+
+if (game.time.now > enemyNextFire && enemyBullets.countDead() && livingEnemies.length > 0)
+    {
+        enemyNextFire = game.time.now + bossFireRate;
+        enemyBullet.reset(bossBulletPoint.x, bossBulletPoint.y);
+        game.physics.arcade.moveToObject(enemyBullet, player, 500);
+        firingTimer = game.time.now ;
     }
 }
 
@@ -873,26 +888,6 @@ function bulletGoAway6 (enemyBullets6, outerwalls){
 
 function enemyKill (badGuys, bullets) {
     bullets.kill()
-}
-
-function enemyFires () {
-
-    enemyBullet = enemyBullets.getFirstExists(false);
-    livingEnemies.length=0;
-    badGuys.forEachAlive(function(badGuy){
-        livingEnemies.push(badGuy);
-    });
-
-if (game.time.now > enemyNextFire && enemyBullets.countDead() && livingEnemies.length > 0)
-    
-    {
-        enemyNextFire = game.time.now + bossFireRate;
-        var random=game.rnd.integerInRange(0,livingEnemies.length-1);
-        var shooter=livingEnemies[random];
-        enemyBullet.reset(shooter.body.x + 57, shooter.body.y -43);
-        game.physics.arcade.moveToObject(enemyBullet, player, 500);
-        firingTimer = game.time.now ;
-    }
 }
 
 function gameOver() {
