@@ -129,8 +129,6 @@ function preload () {
 function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
-    // game.stage.backgroundColor = '#00000';
-
     game.add.tileSprite(0, 0, 1200, 700, 'sidewalk');
 
     bitmap = game.add.bitmapData(game.width, game.height);
@@ -376,9 +374,7 @@ function update() {
     game.physics.arcade.collide(enemy4, bullets, youDead4, null, this);
     game.physics.arcade.collide(enemy5, bullets, youDead5, null, this);
     game.physics.arcade.collide(enemy6, bullets, youDead6, null, this);
-    game.physics.arcade.collide(badGuys, walls);
     game.physics.arcade.overlap(player, badGuys, defenestrate, null, this)
-    // game.physics.arcade.overlap(badGuys, windows, fallOutWindow, null, this)
     game.physics.arcade.collide(enemyBullets, outerwalls, bulletGoAway, null, this);
     game.physics.arcade.collide(enemyBullets2, outerwalls, bulletGoAway2, null, this);
     game.physics.arcade.collide(enemyBullets3, outerwalls, bulletGoAway3, null, this);
@@ -386,6 +382,19 @@ function update() {
     game.physics.arcade.collide(enemyBullets5, outerwalls, bulletGoAway5, null, this);
     game.physics.arcade.collide(enemyBullets6, outerwalls, bulletGoAway6, null, this);
     game.physics.arcade.overlap(badGuys, bullets, enemyKill, null, this);
+    game.physics.arcade.overlap(enemyBullets, player, playerKill1, null, this);
+    game.physics.arcade.overlap(enemyBullets2, player, playerKill2, null, this);
+    game.physics.arcade.overlap(enemyBullets3, player, playerKill3, null, this);
+    game.physics.arcade.overlap(enemyBullets4, player, playerKill4, null, this);
+    game.physics.arcade.overlap(enemyBullets5, player, playerKill5, null, this);
+    game.physics.arcade.overlap(enemyBullets6, player, playerKill6, null, this);
+    game.physics.arcade.overlap(enemyBullets, bullets, bulletKill1, null, this);
+    game.physics.arcade.overlap(enemyBullets2, bullets, bulletKill2, null, this);
+    game.physics.arcade.overlap(enemyBullets3, bullets, bulletKill3, null, this);
+    game.physics.arcade.overlap(enemyBullets4, bullets, bulletKill4, null, this);
+    game.physics.arcade.overlap(enemyBullets5, bullets, bulletKill5, null, this);
+    game.physics.arcade.overlap(enemyBullets6, bullets, bulletKill6, null, this);
+
 
     if (cursors.up.isDown){
         game.time.slowMotion = 1
@@ -499,12 +508,17 @@ function update() {
 
     bitmap.dirty = true;
 
+    if (player.alive == true){
     enemy1Shoot();
     enemy2Shoot();
     enemy3Shoot();
     enemy4Shoot();
     enemy5Shoot();
     enemy6Shoot();
+    }
+    else {
+        gameOver();
+    }
 
     
 
@@ -570,22 +584,24 @@ function defenestrate(player, badGuys) {
 
 
 function fire() {
-    if (cursors.left.isDown || cursors.right.isDown || cursors.up.isDown || cursors.down.isDown){
-    gunShot.play();
-    }
-    else {
-        shootEffect.play();
-    }
-    if (game.time.now > nextFire && bullets.countDead() > 0)
-    {
-        nextFire = game.time.now + fireRate;
+    if (player.alive == true){
+        if (cursors.left.isDown || cursors.right.isDown || cursors.up.isDown || cursors.down.isDown){
+        gunShot.play();
+        }
+        else {
+            shootEffect.play();
+        }
+        if (game.time.now > nextFire && bullets.countDead() > 0)
+        {
+            nextFire = game.time.now + fireRate;
 
-        bullet = bullets.getFirstDead();
+            bullet = bullets.getFirstDead();
 
-        bullet.reset(bulletPoint.x, bulletPoint.y);
+            bullet.reset(bulletPoint.x, bulletPoint.y);
 
-        bullet.rotation = game.physics.arcade.moveToPointer(bullet, 1000, game.input.activePointer);
+            bullet.rotation = game.physics.arcade.moveToPointer(bullet, 1000, game.input.activePointer);
 
+        }
     }
 }
 
@@ -600,7 +616,7 @@ function enemy1Shoot() {
 
             bullet.reset(enemy1BulletPoint.x, enemy1BulletPoint.y);
 
-            game.physics.arcade.moveToObject(bullet, player, 700);
+            game.physics.arcade.moveToObject(bullet, player, 420);
         }
     }
 }
@@ -617,7 +633,7 @@ function enemy2Shoot() {
 
             bullet.reset(enemy2BulletPoint.x, enemy2BulletPoint.y);
 
-            game.physics.arcade.moveToObject(bullet, player, 700);
+            game.physics.arcade.moveToObject(bullet, player, 420);
         }
     }
 }
@@ -634,7 +650,7 @@ function enemy3Shoot() {
 
             bullet.reset(enemy3BulletPoint.x, enemy3BulletPoint.y);
 
-            game.physics.arcade.moveToObject(bullet, player, 700);
+            game.physics.arcade.moveToObject(bullet, player, 420);
         }
     }
 }
@@ -649,7 +665,7 @@ function enemy4Shoot() {
 
             bullet.reset(enemy4BulletPoint.x, enemy4BulletPoint.y);
 
-            game.physics.arcade.moveToObject(bullet, player, 700);
+            game.physics.arcade.moveToObject(bullet, player, 420);
         }
     }
 }
@@ -666,7 +682,7 @@ function enemy5Shoot() {
 
             bullet.reset(enemy5BulletPoint.x, enemy5BulletPoint.y);
 
-            game.physics.arcade.moveToObject(bullet, player, 700);
+            game.physics.arcade.moveToObject(bullet, player, 420);
         }
     }
 }
@@ -683,13 +699,73 @@ function enemy6Shoot() {
 
             bullet.reset(enemy6BulletPoint.x, enemy6BulletPoint.y);
 
-            game.physics.arcade.moveToObject(bullet, player, 600);
+            game.physics.arcade.moveToObject(bullet, player, 420);
         }
     }
 }
 
+function playerKill1(enemyBullets, player) {
+    enemyBullets.kill();
+    player.kill();
+}
+
+function playerKill2(enemyBullets2, player) {
+    enemyBullets2.kill();
+    player.kill();
+}
+
+function playerKill3(enemyBullets3, player) {
+    enemyBullets3.kill();
+    player.kill();
+}
+
+function playerKill4(enemyBullets4, player) {
+    enemyBullets4.kill();
+    player.kill();
+}
+
+function playerKill5(enemyBullets5, player) {
+    enemyBullets5.kill();
+    player.kill();
+}
+
+function playerKill6(enemyBullets6, player) {
+    enemyBullets6.kill();
+    player.kill();
+}
+
 function collisionHandler (bullets, walls) {
     bullets.kill();    
+}
+
+function bulletKill1(enemyBullets, bullets) {
+    enemyBullets.kill();
+    bullets.kill();
+}
+
+function bulletKill2(enemyBullets2, bullets) {
+    enemyBullets2.kill();
+    bullets.kill();
+}
+
+function bulletKill3(enemyBullets3, bullets) {
+    enemyBullets3.kill();
+    bullets.kill();
+}
+
+function bulletKill4(enemyBullets4, bullets) {
+    enemyBullets4.kill();
+    bullets.kill();
+}
+
+function bulletKill5(enemyBullets5, bullets) {
+    enemyBullets5.kill();
+    bullets.kill();
+}
+
+function bulletKill6(enemyBullets6, bullets) {
+    enemyBullets6.kill();
+    bullets.kill();
 }
 
 function youDead1(enemy1, bullets){
@@ -705,7 +781,6 @@ function youDead1(enemy1, bullets){
     game.add.tween(addScore).to({y: enemy1.y - 100 }, 1500, Phaser.Easing.Linear.None, true);
     game.add.tween(addScore).to({alpha: 0}, 1500, Phaser.Easing.Linear.None, true);
     
-
 }
 
 function youDead2(enemy2, bullets){
@@ -810,21 +885,18 @@ function enemyKill (badGuys, bullets) {
 
 function enemyFires () {
 
-    //  Grab the first bullet we can from the pool
     enemyBullet = enemyBullets.getFirstExists(false);
 
     livingEnemies.length=0;
 
     badGuys.forEachAlive(function(badGuy){
 
-        // put every living enemy in an array
         livingEnemies.push(badGuy);
     });
 
 if (game.time.now > enemyNextFire && enemyBullets.countDead() && livingEnemies.length > 0)
     
     {
-
         enemyNextFire = game.time.now + enemyFireRate;
         
         var random=game.rnd.integerInRange(0,livingEnemies.length-1);
@@ -838,6 +910,16 @@ if (game.time.now > enemyNextFire && enemyBullets.countDead() && livingEnemies.l
         game.physics.arcade.moveToObject(enemyBullet, player, 500);
         firingTimer = game.time.now + 200;
     }
+
+}
+
+function gameOver() {
+    var gameover = game.add.text(game.world.centerX - 200, game.world.centerY, "Game Over", {  fill: '#fff' });
+        gameover.font = 'Press Start 2P'
+        gameover.stroke = '#000000';
+        gameover.strokeThickness = 2;
+        gameover.fontsize = 300;
+        gameover.setShadow(5, 5, 'rgba(0,0,0,0.5)', 5);
 
 }
 
