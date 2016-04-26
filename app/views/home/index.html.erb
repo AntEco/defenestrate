@@ -16,12 +16,7 @@
 
 WebFontConfig = {
 
-    //  'active' means all requested fonts have finished loading
-    //  We set a 1 second delay before calling 'createText'.
-    //  For some reason if we don't the browser cannot render the text the first time it's created.
     active: function() { game.time.events.add(Phaser.Timer.SECOND, createText, this); },
-
-    //  The Google Fonts we want to load (specify as many as you like in the array)
     google: { families: [ 'Press Start 2P' ] }
 
 };
@@ -65,6 +60,8 @@ var enemyNextFire4 = 100;
 var enemyNextFire5 = 100;
 var enemyNextFire6 = 100;
 
+var bossFireRate = 2500;
+
 var livingEnemies = [];
 var bitmap;
 
@@ -97,7 +94,6 @@ var scoreText;
 var titleText;
 var levelText;
 var addScore;
-
 
 function preload () {
     game.load.script('webfont', '//ajax.googleapis.com/ajax/libs/webfont/1/webfont.js');
@@ -140,6 +136,13 @@ function create() {
     fastMoEffect = game.add.audio('fastMoEffect');
     shootEffect = game.add.audio('shootEffect');
     gunShot = game.add.audio('gunShot');
+    menuSong = game.add.audio('menuSong');
+    shootEffect.volume = 1;
+    gunShot.volume = .18
+    menuSong.volume = .1
+    menuSong.loop = true;
+    menuSong.play();
+    slowMoEffect.allowMultiple = false;
 
     cursors = game.input.keyboard.createCursorKeys();
     meleeKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -208,7 +211,6 @@ function create() {
     enemy3.animations.add('bloodSplatter', Phaser.Animation.generateFrameNames ('splatter_1_000', 1, 7), 10, true);
     tween3 = game.add.tween(enemy3).to( { y: 250 }, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
 
-
     enemy4 = game.add.sprite(700, 150, 'enemy_sprite', 8);
     game.physics.arcade.enable(enemy4);
     enemy4.anchor.setTo(0.5, 0.5)
@@ -234,7 +236,6 @@ function create() {
     enemy6.animations.add('enemyRun', Phaser.Animation.generateFrameNames ('enem', 1, 20), 10, true);
     enemy6.animations.add('bloodSplatter', Phaser.Animation.generateFrameNames ('splatter_1_000', 1, 7), 10, true);
     tween6 = game.add.tween(enemy6).to( { y: 550 }, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
-
 
     enemyBullets = game.add.group();
     enemyBullets.enableBody = true;
@@ -307,7 +308,6 @@ function create() {
         y = i * 200 + 150 ;
         game.add.image(x, y, 'block', 0, walls).scale.setTo(.5, 8);
     }
-
 }
 
 function createText() {
@@ -318,7 +318,6 @@ function createText() {
 
     scoreText.font = 'Press Start 2P';
     levelText.font = 'Press Start 2P';
-
 
     scoreText.stroke = '#000000';
     scoreText.strokeThickness = 2;
@@ -337,7 +336,6 @@ function createBadGuys(){
         for (var x = 0; x < 1; x++){
             var badGuy = badGuys.create(x, y * 250, 'lookupbadguy');
             badGuy.anchor.setTo(0.5, 0.5)
-
         }
     }
     badGuys.x = 980
@@ -350,8 +348,6 @@ function update() {
     player.body.velocity.y = 0;
     player.rotation = game.physics.arcade.angleToPointer(player)
 
-
-
     enemy1.rotation = game.physics.arcade.angleBetween(enemy1, player);
     enemy2.rotation = game.physics.arcade.angleBetween(enemy2, player);
     enemy3.rotation = game.physics.arcade.angleBetween(enemy3, player);
@@ -359,7 +355,6 @@ function update() {
     enemy5.rotation = game.physics.arcade.angleBetween(enemy5, player);
     enemy6.rotation = game.physics.arcade.angleBetween(enemy6, player);
     
-
     game.physics.arcade.collide(player, outerwalls);
     game.physics.arcade.collide(enemy1, outerwalls);
     game.physics.arcade.collide(enemy2, outerwalls);
@@ -453,10 +448,7 @@ function update() {
         game.time.slowMotion = 1;
         player.animations.play('melee');
     } 
-    else if (meleeKey.isDown && player.is.touching.enemy1){
-        player.animations.play('melee');
-        player.melee.animations.onAnimationComplete.add(function(){ console.log('this')}, this);
-}
+
     else
     {
         game.time.slowMotion = 12
@@ -467,9 +459,7 @@ function update() {
         fire();
     }
 
-    if (cursors.left.isDown == true && cursors.down.isDown == true && cursors.right.isDown == true && cursors.up.isDown == true){
-        fastMoEffect.play();
-    }
+    
 
 
     bulletPoint = new Phaser.Point(player.x + 29, player.y + 8);
@@ -520,9 +510,7 @@ function update() {
         gameOver();
     }
 
-    
-
-
+    slowMoPlayer();
 }
 
 function getWallIntersection(ray){
@@ -555,14 +543,13 @@ function getWallIntersection(ray){
         }
 
     })
-
 }
 
 function defenestrate(player, badGuys) {
 
     if (meleeKey.isDown){
         game.time.events.add((Phaser.Timer.SECOND/2), killBaddy, this);
-         }
+    }
         function killBaddy() {
             badGuys.y += 200;
             badGuys.kill();
@@ -576,12 +563,25 @@ function defenestrate(player, badGuys) {
             addScore.setShadow(5, 5, 'rgba(0,0,0,0.5)', 5);
             game.add.tween(addScore).to({y: game.world.centerY - 100 }, 2000, Phaser.Easing.Linear.None, true);
             game.add.tween(addScore).to({alpha: 0}, 2000, Phaser.Easing.Linear.None, true);
-}
-        
+            
+            if (enemy1.alive == false && enemy2.alive == false && enemy3.alive == false && enemy4.alive == false && enemy5.alive == false && enemy6.alive == false){
+                youwin = game.add.text(game.world.centerX - 200, game.world.centerY, "You Win!", {  fill: '#fff' });
+                youwin.font = 'Press Start 2P'
+                youwin.stroke = '#000000';
+                youwin.strokeThickness = 2;
+                youwin.fontsize = 300;
+                youwin.setShadow(5, 5, 'rgba(0,0,0,0.5)', 5);
+                youwin.align = 'center';
+             }
+        }    
     
 }
 
-
+function slowMoPlayer() {
+    if (cursors.left.isUp == false && cursors.down.isUp == false && cursors.right.isUp == false && cursors.up.isUp == false){
+        slowMoEffect.play();
+    }
+}
 
 function fire() {
     if (player.alive == true){
@@ -611,12 +611,9 @@ function enemy1Shoot() {
         {
             enemy1.animations.play('enemyRun');
             enemyNextFire = game.time.now + enemyFireRate;
-
             bullet = enemyBullets.getFirstDead();
-
             bullet.reset(enemy1BulletPoint.x, enemy1BulletPoint.y);
-
-            game.physics.arcade.moveToObject(bullet, player, 420);
+            game.physics.arcade.moveToObject(bullet, player, 450);
         }
     }
 }
@@ -626,14 +623,10 @@ function enemy2Shoot() {
         if (game.time.now > enemyNextFire2 && enemyBullets2.countDead() > 0)
         {
             enemy2.animations.play('enemyRun');
-  
             enemyNextFire2 = game.time.now + enemyFireRate;
-
             bullet = enemyBullets2.getFirstDead();
-
             bullet.reset(enemy2BulletPoint.x, enemy2BulletPoint.y);
-
-            game.physics.arcade.moveToObject(bullet, player, 420);
+            game.physics.arcade.moveToObject(bullet, player, 450);
         }
     }
 }
@@ -643,14 +636,10 @@ function enemy3Shoot() {
         if (game.time.now > enemyNextFire3 && enemyBullets3.countDead() > 0)
         {
             enemy3.animations.play('enemyRun');
-
             enemyNextFire3 = game.time.now + enemyFireRate;
-
             bullet = enemyBullets3.getFirstDead();
-
             bullet.reset(enemy3BulletPoint.x, enemy3BulletPoint.y);
-
-            game.physics.arcade.moveToObject(bullet, player, 420);
+            game.physics.arcade.moveToObject(bullet, player, 450);
         }
     }
 }
@@ -660,12 +649,9 @@ function enemy4Shoot() {
         if (game.time.now > enemyNextFire4 && enemyBullets4.countDead() > 0)
         {
             enemyNextFire4 = game.time.now + enemyFireRate;
-
             bullet = enemyBullets4.getFirstDead();
-
             bullet.reset(enemy4BulletPoint.x, enemy4BulletPoint.y);
-
-            game.physics.arcade.moveToObject(bullet, player, 420);
+            game.physics.arcade.moveToObject(bullet, player, 450);
         }
     }
 }
@@ -675,14 +661,10 @@ function enemy5Shoot() {
         if (game.time.now > enemyNextFire5 && enemyBullets5.countDead() > 0)
         {
             enemy5.animations.play('enemyRun');
-
             enemyNextFire5 = game.time.now + enemyFireRate;
-
             bullet = enemyBullets5.getFirstDead();
-
             bullet.reset(enemy5BulletPoint.x, enemy5BulletPoint.y);
-
-            game.physics.arcade.moveToObject(bullet, player, 420);
+            game.physics.arcade.moveToObject(bullet, player, 450);
         }
     }
 }
@@ -699,7 +681,7 @@ function enemy6Shoot() {
 
             bullet.reset(enemy6BulletPoint.x, enemy6BulletPoint.y);
 
-            game.physics.arcade.moveToObject(bullet, player, 420);
+            game.physics.arcade.moveToObject(bullet, player, 450);
         }
     }
 }
@@ -741,31 +723,43 @@ function collisionHandler (bullets, walls) {
 function bulletKill1(enemyBullets, bullets) {
     enemyBullets.kill();
     bullets.kill();
+    score += 10;
+    scoreText.text = scoreString + score; 
 }
 
 function bulletKill2(enemyBullets2, bullets) {
     enemyBullets2.kill();
     bullets.kill();
+    score += 10;
+    scoreText.text = scoreString + score;
 }
 
 function bulletKill3(enemyBullets3, bullets) {
     enemyBullets3.kill();
     bullets.kill();
+    score += 10;
+    scoreText.text = scoreString + score;
 }
 
 function bulletKill4(enemyBullets4, bullets) {
     enemyBullets4.kill();
     bullets.kill();
+    score += 10;
+    scoreText.text = scoreString + score;
 }
 
 function bulletKill5(enemyBullets5, bullets) {
     enemyBullets5.kill();
     bullets.kill();
+    score += 10;
+    scoreText.text = scoreString + score;
 }
 
 function bulletKill6(enemyBullets6, bullets) {
     enemyBullets6.kill();
     bullets.kill();
+    score += 10;
+    scoreText.text = scoreString + score;
 }
 
 function youDead1(enemy1, bullets){
@@ -881,36 +875,24 @@ function enemyKill (badGuys, bullets) {
     bullets.kill()
 }
 
-
-
 function enemyFires () {
 
     enemyBullet = enemyBullets.getFirstExists(false);
-
     livingEnemies.length=0;
-
     badGuys.forEachAlive(function(badGuy){
-
         livingEnemies.push(badGuy);
     });
 
 if (game.time.now > enemyNextFire && enemyBullets.countDead() && livingEnemies.length > 0)
     
     {
-        enemyNextFire = game.time.now + enemyFireRate;
-        
+        enemyNextFire = game.time.now + bossFireRate;
         var random=game.rnd.integerInRange(0,livingEnemies.length-1);
-
-        // randomly select one of them
         var shooter=livingEnemies[random];
-        
-        // And fire the bullet from this enemy
         enemyBullet.reset(shooter.body.x + 57, shooter.body.y -43);
-
         game.physics.arcade.moveToObject(enemyBullet, player, 500);
-        firingTimer = game.time.now + 200;
+        firingTimer = game.time.now ;
     }
-
 }
 
 function gameOver() {
@@ -920,7 +902,6 @@ function gameOver() {
         gameover.strokeThickness = 2;
         gameover.fontsize = 300;
         gameover.setShadow(5, 5, 'rgba(0,0,0,0.5)', 5);
-
 }
 
 </script>
