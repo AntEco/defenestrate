@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <title>Defenestrate</title>
     <script type="text/javascript" src="assets/phaser.min.js"></script>
-    <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
     <style type="text/css">
         body {
             margin: 0;
@@ -548,21 +547,27 @@ function getWallIntersection(ray){
 function defenestrate(player, badGuys) {
 
     if (meleeKey.isDown){
-        badGuys.y += 200;
-        badGuys.kill();
-        defenestrateAnimate.animations.play('falling');
-        score += 500;
-        scoreText.text = scoreString + score;
-        var addScore = game.add.text(game.world.centerX, game.world.centerY, "DEFENESTRATION + 500", {  fill: '#fff' });
-        addScore.font = 'Press Start 2P'
-        addScore.stroke = '#000000';
-        addScore.strokeThickness = 2;
-        addScore.setShadow(5, 5, 'rgba(0,0,0,0.5)', 5);
-        game.add.tween(addScore).to({y: game.world.centerY - 100 }, 2000, Phaser.Easing.Linear.None, true);
-        game.add.tween(addScore).to({alpha: 0}, 2000, Phaser.Easing.Linear.None, true);
-    }
+        game.time.events.add((Phaser.Timer.SECOND/2), killBaddy, this);
+         }
+        function killBaddy() {
+            badGuys.y += 200;
+            badGuys.kill();
+            defenestrateAnimate.animations.play('falling');
+            score += 500;
+            scoreText.text = scoreString + score;
+            var addScore = game.add.text(game.world.centerX, game.world.centerY, "DEFENESTRATION !!!", {  fill: '#fff' });
+            addScore.font = 'Press Start 2P'
+            addScore.stroke = '#000000';
+            addScore.strokeThickness = 2;
+            addScore.setShadow(5, 5, 'rgba(0,0,0,0.5)', 5);
+            game.add.tween(addScore).to({y: game.world.centerY - 100 }, 2000, Phaser.Easing.Linear.None, true);
+            game.add.tween(addScore).to({alpha: 0}, 2000, Phaser.Easing.Linear.None, true);
+}
+        
     
 }
+
+
 
 function fire() {
     if (cursors.left.isDown || cursors.right.isDown || cursors.up.isDown || cursors.down.isDown){
