@@ -26,6 +26,7 @@ var game = new Phaser.Game(1200, 700, Phaser.CANVAS, '', { preload: preload, cre
 var player;
 var bulletPoint;
 var testBulletPoint;
+var runAnim;
 
 var cursors;
 var meleeKey;
@@ -136,12 +137,12 @@ function create() {
     fastMoEffect = game.add.audio('fastMoEffect');
     shootEffect = game.add.audio('shootEffect');
     gunShot = game.add.audio('gunShot');
-    // menuSong = game.add.audio('menuSong');
-    // shootEffect.volume = 1;
-    // gunShot.volume = .18
-    // menuSong.volume = .1
-    // menuSong.loop = true;
-    // menuSong.play();
+    menuSong = game.add.audio('menuSong');
+    shootEffect.volume = 1;
+    gunShot.volume = .18
+    menuSong.volume = .1
+    menuSong.loop = true;
+    menuSong.play();
     slowMoEffect.allowMultiple = false;
 
     cursors = game.input.keyboard.createCursorKeys();
@@ -175,7 +176,7 @@ function create() {
     game.physics.arcade.enable(player);
     player.anchor.setTo(0.5, 0.5)
     player.body.collideWorldBounds = true;
-    player.animations.add('run', Phaser.Animation.generateFrameNames ('run', 1, 19), 22, true);
+    runAnim = player.animations.add('run', Phaser.Animation.generateFrameNames ('run', 1, 19), 22, true);
     player.animations.add('melee', Phaser.Animation.generateFrameNames('hit', 1, 15), 18, true);
     player.bringToTop();
 
@@ -508,8 +509,9 @@ function update() {
     else {
         gameOver();
     }
-
+    if (runAnim.isPlaying == true){
     slowMoPlayer();
+    }
 }
 
 function getWallIntersection(ray){
@@ -576,18 +578,16 @@ function defenestrate(player, badGuys) {
 }
 
 function slowMoPlayer() {
-    if (cursors.left.isUp == false && cursors.down.isUp == false && cursors.right.isUp == false && cursors.up.isUp == false){
         slowMoEffect.play();
-    }
 }
 
 function fire() {
     if (player.alive == true){
-        if (cursors.left.isDown || cursors.right.isDown || cursors.up.isDown || cursors.down.isDown){
-        gunShot.play();
+        if (cursors.left.isUp && cursors.right.isUp && cursors.up.isUp && cursors.down.isUp){
+        shootEffect.play();
         }
         else {
-            shootEffect.play();
+            gunShot.play();
         }
         if (game.time.now > nextFire && bullets.countDead() > 0)
         {
