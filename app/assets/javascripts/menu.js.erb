@@ -3,6 +3,10 @@ $(document).ready(function(){
 var beepOne = $("#menuNoise1")[0];
 var beepTwo = $("#menuNoise2")[0];
 
+// audio1.muted = true;
+
+// ($'audio').attr('muted', true);
+
 $("button")
 	.mouseenter(function() {
 		beepOne.play();
@@ -18,6 +22,18 @@ $(function(){
     	top: '0px'
     }, 6000);
 });
+
+
+$("#slider").click(function(){
+	document.getElementById('audio1').muted=!document.getElementById('audio1').muted
+})
+
+// $('#slider').click(function{
+// 	if (document.getElementById("audio1").muted = true){
+// 		document.getElementById("audio1").muted = false
+// 	}
+    
+// })
 
 // function setCookie(c_name,value,exdays)
 // {

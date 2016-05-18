@@ -16,7 +16,7 @@
 
 <div id='menu2' style="width:1200px;height:700px;background-image:url('assets/controlPage.gif');background-size: 100%;">
 	
-	<audio autoplay loop><source src="assets/audio/OddLook.mp3" type="audio/mpeg"></audio>
+	<audio id='audio1' autoplay loop muted><source src="assets/audio/OddLook.mp3" type="audio/mpeg"></audio>
 
 	<audio id="menuNoise1" preload="auto">
 		<source src="assets/audio/button-3.mp3">
@@ -26,7 +26,11 @@
 		<source src="assets/audio/button-16.mp3">
 	</audio>
 	<br>
-	<button id="ControlButton"><a href="/menu">Menu</a></button><br>
+
+	<button id = "slider">
+		Mute/Unmute
+	</button>
+	<button id="controlButton"><a href="/menu">Menu</a></button><br>
 	
 
 	<div id="story">
@@ -51,7 +55,7 @@
 		<u>Move Player:</u><br><br>
 		<img src="assets/computercursors.png">
 		</div><br>
-		<u>Melee:</u><br><br>
+		<u>Melee/Defenestrate:</u><br><br>
 		<img src="assets/spacebar.png"><br>
 	</div>
 

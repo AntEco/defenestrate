@@ -3,20 +3,22 @@
 <head> 
     <meta charset="UTF-8" />
     <title>Menu</title>
-    <script type="text/javascript" src="assets/phaser.min.js"></script>
-    <script type="text/javascript" src="assets/menu.js.erb"></script>
-
-    <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+    
     <style type="text/css">
         body {
             margin: 0;
         }
     </style>
+    <script type="text/javascript" src="assets/phaser.min.js"></script>
+    <script type="text/javascript" src="assets/menu.js.erb"></script>
+
+    <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
 </head>
 <body>
 <div id='menu1' style="width:1200px;height:700px;background-image:url('assets/menupage.gif');background-size:100%;">
 
-	<audio autoplay loop><source src="assets/audio/OddLook.mp3" type="audio/mpeg"></audio>
+	<audio id='audio1' autoplay muted loop><source src="assets/audio/OddLook.mp3" type="audio/mpeg"></audio>
+<!-- 	<button onclick="document.getElementById('audio1').muted=!document.getElementById('audio1').muted">Mute/ Unmute</button> -->
 
 	<audio id="menuNoise1" preload="auto">
 		<source src="assets/audio/button-3.mp3">
@@ -25,10 +27,14 @@
 	<audio id="menuNoise2" preload="auto">
 		<source src="assets/audio/button-16.mp3">
 	</audio>
-
+	<button id = "slider" onclick="document.getElementById('audio1').muted=!document.getElementById('audio1').muted">
+		Mute/Unmute
+	</button>
 	<div id='gametitle'>
 		Window of Time
 	</div>
+
+
 
 	<div id='options'>
 		<button id="menuButton1"><a href="/">Start</a></button><br>

@@ -11,7 +11,7 @@
     </style>
 </head>
 <body>
-
+<div id='thegame'>
 <script type="text/javascript">
 
 WebFontConfig = {
@@ -144,8 +144,10 @@ function create() {
     menuSong.loop = true;
     menuSong.play();
     slowMoEffect.allowMultiple = false;
+    this.soundToggle = this.game.add.button(this.game.world.width - 150, 15, 'tile1', this.toggleSound, this);this.soundToggle.frame = 1
 
     cursors = game.input.keyboard.createCursorKeys();
+    
     meleeKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
     game.time.advancedTiming = true;
@@ -378,12 +380,12 @@ function update() {
     game.physics.arcade.collide(enemyBullets5, outerwalls, bulletGoAway5, null, this);
     game.physics.arcade.collide(enemyBullets6, outerwalls, bulletGoAway6, null, this);
     game.physics.arcade.overlap(badGuys, bullets, enemyKill, null, this);
-    game.physics.arcade.overlap(enemyBullets, player, playerKill1, null, this);
-    game.physics.arcade.overlap(enemyBullets2, player, playerKill2, null, this);
-    game.physics.arcade.overlap(enemyBullets3, player, playerKill3, null, this);
-    game.physics.arcade.overlap(enemyBullets4, player, playerKill4, null, this);
-    game.physics.arcade.overlap(enemyBullets5, player, playerKill5, null, this);
-    game.physics.arcade.overlap(enemyBullets6, player, playerKill6, null, this);
+    // game.physics.arcade.overlap(enemyBullets, player, playerKill1, null, this);
+    // game.physics.arcade.overlap(enemyBullets2, player, playerKill2, null, this);
+    // game.physics.arcade.overlap(enemyBullets3, player, playerKill3, null, this);
+    // game.physics.arcade.overlap(enemyBullets4, player, playerKill4, null, this);
+    // game.physics.arcade.overlap(enemyBullets5, player, playerKill5, null, this);
+    // game.physics.arcade.overlap(enemyBullets6, player, playerKill6, null, this);
     game.physics.arcade.overlap(enemyBullets, bullets, bulletKill1, null, this);
     game.physics.arcade.overlap(enemyBullets2, bullets, bulletKill2, null, this);
     game.physics.arcade.overlap(enemyBullets3, bullets, bulletKill3, null, this);
@@ -900,5 +902,6 @@ function gameOver() {
 }
 
 </script>
+</div>
     </body>
 </html>
