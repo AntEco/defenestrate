@@ -120,6 +120,8 @@ function preload () {
     game.load.audio('shootEffect', 'assets/audio/shootEffect.mp3')
     game.load.audio('gunShot', 'assets/audio/gunshot.mp3')
     game.load.image('pause', 'assets/pause.png');
+    game.load.image('mute', 'assets/mute.png');
+    game.load.image('unmute', 'assets/unmute.png');
 
 }
 
@@ -144,11 +146,14 @@ function create() {
     menuSong.loop = true;
     menuSong.play();
     slowMoEffect.allowMultiple = false;
-    this.soundToggle = this.game.add.button(this.game.world.width - 150, 15, 'tile1', this.toggleSound, this);this.soundToggle.frame = 1
+    soundOff = game.add.button(game.world.width - 50, 0, 'mute', muteGame)
+    soundOn = game.add.button(game.world.width - 110, 0, 'unmute', unmuteGame)
 
     cursors = game.input.keyboard.createCursorKeys();
     
     meleeKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+    muteButton = game.input.keyboard.addKey(Phaser.Keyboard.M)
 
     game.time.advancedTiming = true;
     game.time.desiredFps = 120;
@@ -316,7 +321,7 @@ function create() {
 function createText() {
 
     scoreString = 'Score: ';
-    scoreText = game.add.text(850, 4, scoreString + score, {  fill: '#fff' });
+    scoreText = game.add.text(750, 4, scoreString + score, {  fill: '#fff' });
     levelText = game.add.text(10, 4, "Level - 1", {fill: "#fff"});
 
     scoreText.font = 'Press Start 2P';
@@ -514,6 +519,10 @@ function update() {
     if (runAnim.isPlaying == true){
     slowMoPlayer();
     }
+
+    if (muteButton.isDown){
+        muteGame();
+    }
 }
 
 function getWallIntersection(ray){
@@ -580,7 +589,15 @@ function defenestrate(player, badGuys) {
 }
 
 function slowMoPlayer() {
-        slowMoEffect.play();
+    slowMoEffect.play();
+}
+
+function muteGame() {
+    game.sound.mute = true;
+}
+
+function unmuteGame() {
+    game.sound.mute = false;
 }
 
 function fire() {
