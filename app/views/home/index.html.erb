@@ -146,8 +146,8 @@ function create() {
     menuSong.loop = true;
     menuSong.play();
     slowMoEffect.allowMultiple = false;
-    soundOff = game.add.button(game.world.width - 50, 0, 'mute', muteGame)
-    soundOn = game.add.button(game.world.width - 110, 0, 'unmute', unmuteGame)
+    soundOff = game.add.button(game.world.width - 55, 0, 'mute', muteGame)
+    soundOn = game.add.button(game.world.width - 115, 0, 'unmute', unmuteGame)
 
     cursors = game.input.keyboard.createCursorKeys();
     meleeKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
