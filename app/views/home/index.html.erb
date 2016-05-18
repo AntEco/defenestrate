@@ -150,10 +150,12 @@ function create() {
     soundOn = game.add.button(game.world.width - 110, 0, 'unmute', unmuteGame)
 
     cursors = game.input.keyboard.createCursorKeys();
-    
     meleeKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-
     muteButton = game.input.keyboard.addKey(Phaser.Keyboard.M)
+    upKey = game.input.keyboard.addKey(Phaser.Keyboard.W)
+    downKey = game.input.keyboard.addKey(Phaser.Keyboard.S)
+    leftKey = game.input.keyboard.addKey(Phaser.Keyboard.A)
+    rightKey = game.input.keyboard.addKey(Phaser.Keyboard.D)
 
     game.time.advancedTiming = true;
     game.time.desiredFps = 120;
@@ -399,19 +401,19 @@ function update() {
     game.physics.arcade.overlap(enemyBullets6, bullets, bulletKill6, null, this);
 
 
-    if (cursors.up.isDown){
+    if ((cursors.up.isDown || upKey.isDown)){
         game.time.slowMotion = 1
         player.body.velocity.y = -150;
         player.animations.play('run');
 
-        if (cursors.up.isDown && cursors.right.isDown)
+        if ((cursors.up.isDown || upKey.isDown) && (cursors.right.isDown || rightKey.isDown))
         {
             game.time.slowMotion = 1
             player.body.velocity.x = 150;
             player.body.velocity.y = -150;
             player.animations.play('run');
         }
-        else if (cursors.up.isDown && cursors.left.isDown)
+        else if ((cursors.up.isDown || upKey.isDown) && (cursors.left.isDown || leftKey.isDown))
         {
             game.time.slowMotion = 1
             player.body.velocity.x = -150;
@@ -419,20 +421,20 @@ function update() {
             player.animations.play('run');
         }
     }
-    else if (cursors.down.isDown)
+    else if ((cursors.down.isDown || downKey.isDown))
     {
         game.time.slowMotion = 1
         player.body.velocity.y = 150;
         player.animations.play('run');
 
-        if (cursors.down.isDown && cursors.right.isDown)
+        if ((cursors.down.isDown || downKey.isDown) && (cursors.right.isDown || rightKey.isDown))
         {
             game.time.slowMotion = 1
             player.body.velocity.x = 150;
             player.body.velocity.y = 150;
             player.animations.play('run');
         }
-        else if (cursors.down.isDown && cursors.left.isDown)
+        else if ((cursors.down.isDown || downKey.isDown) && (cursors.left.isDown || leftKey.isDown))
         {
             game.time.slowMotion = 1
             player.body.velocity.x = -150;
@@ -440,13 +442,13 @@ function update() {
             player.animations.play('run');
         }
     }
-    else if (cursors.left.isDown)
+    else if ((cursors.left.isDown || leftKey.isDown))
     {
         game.time.slowMotion = 1
         player.body.velocity.x = -150;
         player.animations.play('run');
     }
-    else if (cursors.right.isDown)
+    else if ((cursors.right.isDown || rightKey.isDown))
     {
         game.time.slowMotion = 1;
         player.body.velocity.x = 150;
